@@ -1,7 +1,3 @@
-// For hashing passwords
-const bcrypt = require('bcrypt');
-const saltRounds = 10;
-
 module.exports = {
 
 	validateOrganization: (details) => {
@@ -14,12 +10,8 @@ module.exports = {
 		return true
 	},
 
-	hashPassword: (password) => {
-		return bcrypt.hash(password, saltRounds)
-	},
-
-	compare: (password, hash) => {
-		return bcrypt.compare(password, hash)
+	validateEmail: (email) => {
+		return true
 	}
 
 	/*

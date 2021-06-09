@@ -1,7 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const queries = require('../db/queries.js')
-const auth = require('../auth/index.js')
 const MESSAGES = require('./util/messages.js')
 const handleErr = require('./util/errors.js')
 const bent = require('bent')
@@ -20,16 +19,13 @@ const getJSON = bent('json')
 */
 
 router.get('/', async (req, res) => {
-
-	// TODO: CLEAN THIS UP
-
-	getJSON(`https://graph.facebook.com/101997734969550/feed?fields=story,message,created_time,attachments,child_attachments&access_token&limit=20&access_token=${process.env.FB_LONG_LIVED_PAGE_ACCESS_TOKEN}`)
-	.then(_res => {
-		res.json(_res)
-	})
-	.catch(err => {
-		console.log(err)
-	})
+	try {
+		let result = await getJSON(`https://graph.facebook.com/101997734969550/feed?fields=story,message,created_time,attachments,child_attachments&access_token&limit=20&access_token=${process.env.FB_LONG_LIVED_PAGE_ACCESS_TOKEN}`)
+		res.json(result)
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send(MESSAGES.ERROR.COULD_NOT_GET_FACEBOOK_FEED)
+	}
 })
 
 

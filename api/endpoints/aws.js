@@ -1,8 +1,9 @@
-const express = require('express')
-const router = express.Router()
+const Router = require('express-promise-router')
+const router = new Router()
 const Session = require("supertokens-node/recipe/session");
 const MESSAGES = require('./util/messages.js')
 const handleErr = require('./util/errors.js')
+const mw = require('./util/middleware')
 const { createHmac } = require('crypto')
 const { S3 } = require('aws-sdk')
 const { v4: uuidv4 } = require('uuid')
@@ -21,18 +22,11 @@ const bucketParams = {
 const maxFileSize = 1024 * 1024 * 5
 const minFileSize = 1024 // About .1 mb
 
-router.get('/signed-policy/:orgid', Session.verifySession(), async (req, res) => {
+router.get('/signed-policy/:orgid', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
 
-	console.log(req.body)
-
-	/* Check requesting user owns this org */
-	let userId = req.session.getUserId()
-
-	if (userId == req.params.orgid) {
-
-		let key = uuidv4()
-
-		await s3.createPresignedPost({
+	let key = uuidv4()
+	try {
+		let signed = await s3.createPresignedPost({
 			Fields: {
 				key: key
 			},
@@ -42,18 +36,12 @@ router.get('/signed-policy/:orgid', Session.verifySession(), async (req, res) =>
 			],
 			Expires: 3000,
 			Bucket: process.env.AWS_BUCKET_NAME
-		}, (err, signed) => {
-			if (err) {
-				res.status(400).send({ message: "Could not generate signed policy" })
-			} else {
-				// Send key to frontend
-				res.status(200).send({ message: "Succesfully generated signed policy", signed })
-			}
 		})
-	} else {
-		res.status(400).send({ message: MESSAGES.ERROR.NOT_ORG_OWNER })
+		res.status(200).send({ message: "Succesfully generated signed policy", signed })
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send({ message: "Could not generate signed policy" })
 	}
-
 
 })
 

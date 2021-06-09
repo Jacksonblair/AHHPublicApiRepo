@@ -1,4 +1,5 @@
-require('dotenv').config()
+const dotenv = require('dotenv')
+dotenv.config()
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
@@ -8,8 +9,8 @@ const port = 3001
 let cors = require("cors");
 let supertokens = require("supertokens-node");
 let Session = require("supertokens-node/recipe/session");
-let websiteUrl = process.env.NODE_ENV == "production" ? "replaceme" : "http://localhost:3000"
-let serverUrl = process.env.NODE_ENV == "production" ? "replaceme" : "http://localhost:3001"
+let websiteUrl = process.env.NODE_ENV == "production" ? "TODO replaceme" : "http://localhost:3000"
+let serverUrl = process.env.NODE_ENV == "production" ? "TODO replaceme" : "http://localhost:3001"
 
 // Initialize supertokens
 supertokens.init({

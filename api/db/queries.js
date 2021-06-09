@@ -16,8 +16,39 @@ module.exports = {
 		/* Should put some extra layer of security here */
 	}, 
 
-	getOrganizationProfileById: (id, callback) => {
-		db.query(`SELECT 
+	insertEmailChange: (uuid, id, newEmail) => {
+		return db.query(`INSERT INTO email_changes (
+			uuid,
+			new_email,
+			organization_id)
+			VALUES ($1, $2, $3)`, [uuid, newEmail, id])
+	},
+
+	insertPasswordReset: (uuid, id) => {
+		return db.query(`INSERT INTO password_resets (
+		uuid,
+		organization_id)
+		VALUES ($1, $2)`, [uuid, id])
+	},
+
+	findEmailChangeByUuid: (uuid) => {
+		return db.query(`SELECT * FROM email_changes WHERE uuid = $1 AND expiry > NOW()`, [uuid])
+	},
+
+	nullifyEmailChange: (uuid) => {
+		return db.query('UPDATE email_changes SET uuid = NULL WHERE uuid = $1', [uuid])
+	},
+
+	nullifyPasswordReset: (uuid) => {
+		return db.query('UPDATE password_resets SET uuid = NULL where uuid = $1', [uuid])
+	},
+
+	findPasswordResetByUuid: (uuid) => {
+		return db.query(`SELECT * FROM password_resets WHERE uuid = $1 AND expiry > NOW()`, [uuid])
+	},
+
+	getOrganizationProfileById: (id) => {
+		return db.query(`SELECT 
 		contact_name,
 		contact_number,
 		organization_name,
@@ -29,15 +60,29 @@ module.exports = {
 		state,
 		postcode,
 		country
-		FROM organizations WHERE id = $1`, [id], callback)
+		FROM organizations WHERE id = $1`, [id])
 	},
 
-	getOrganizationByEmail: (email, callback) => {
-		db.query(`SELECT * FROM organizations WHERE email = $1`, [email], callback)
+	getOrganizationByEmail: (email) => {
+		return db.query(`SELECT * FROM organizations WHERE email = $1`, [email])
 	},
 
-	updateOrganizationProfile: (id, details, callback) => {
-		db.query(`UPDATE organizations
+	getOrganizationPasswordHashById: (id) => {
+		return db.query(`SELECT password_hash FROM organizations WHERE id = $1`, [id])
+	},
+
+	updateOrganizationPasswordHashById: (id, hash) => {
+		return db.query('UPDATE organizations SET password_hash = $2 WHERE id = $1', [id, hash])
+	},
+
+	updateOrganizationEmailById: (id, newEmail) => {
+		return db.query(`UPDATE organizations
+			SET email = $2
+			WHERE id = $1`, [id, newEmail])
+	},
+
+	updateOrganizationProfile: (id, details) => {
+		return db.query(`UPDATE organizations
 			SET contact_name = $2,
 			contact_number = $3,
 			organization_name = $4,
@@ -57,24 +102,23 @@ module.exports = {
 			details.city,
 			details.state,
 			details.postcode,
-			details.country], callback
-		)
+			details.country])
 	},
 
-	updateOrganizationImage: (id, imageUrl, callback) => {
-		db.query(`UPDATE organizations
+	updateOrganizationImage: (id, imageUrl) => {
+		return db.query(`UPDATE organizations
 			set profile_image_url = $2
-			WHERE id = $1`, [id, imageUrl], callback )
+			WHERE id = $1`, [id, imageUrl])
 	},
 
-	updateOrganizationAbout: (id, about, callback) => {
-		db.query(`UPDATE organizations
+	updateOrganizationAbout: (id, about) => {
+		return db.query(`UPDATE organizations
 			SET about = $2
-			WHERE id = $1`, [id, about], callback )
+			WHERE id = $1`, [id, about])
 	},
 
-	insertOrganization: (details, callback) => {
-		db.query(`INSERT INTO organizations (
+	insertOrganization: (details) => {
+		return db.query(`INSERT INTO organizations (
 			contact_name, 
 			contact_number,
 			organization_name,
@@ -101,36 +145,38 @@ module.exports = {
 			details.country,
 			details.abn,
 			details.email,
-			details.password ], callback
-		)
+			details.password ])
 	},
 
-	insertNeed: (orgId, details, callback) => {
-		console.log("INSERTING")
-		console.log(details)
-
-		db.query(`INSERT INTO needs (
+	insertNeed: (id, details) => {
+		return db.query(`INSERT INTO needs (
 			organization_id,
 			name,
 			details
 			) VALUES ($1, $2, $3) 
 			RETURNING id`,
-			[ orgId,
+			[ id,
 			details.name,
-			details.details], callback
-		)
+			details.details])
 	},
 
-	getNeed: (needId, callback) => {
-		db.query(`SELECT * FROM needs WHERE id = $1`, [needId], callback)
+	updateNeed: (id, need) => {
+		return db.query(`UPDATE needs SET 
+			name = $2,
+			details = $3
+			WHERE id = $1`, [id, need.name, need.details])
 	},
 
-	getNeedsByOrgId: (orgId, callback) => {
-		db.query('SELECT * FROM needs WHERE organization_id = $1', [orgId], callback)
+	getNeed: (id) => {
+		return db.query(`SELECT * FROM needs WHERE id = $1`, [id])
 	},
 
-	getCurrentNeeds: (callback) => {
-		db.query('SELECT * FROM needs', [], callback)
+	getNeedsByOrgId: (id) => {
+		return db.query('SELECT * FROM needs WHERE organization_id = $1', [id])
+	},
+
+	getCurrentNeeds: () => {
+		return db.query('SELECT * FROM needs')
 	}
 
 }
@@ -139,6 +185,19 @@ module.exports = {
 
 /*
 	TABLES:
+
+	CREATE TABLE password_resets (
+		organization_id INT REFERENCES organizations(id) NOT NULL,
+		uuid UUID,
+		expiry TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '15 minutes'
+	)
+
+	CREATE TABLE email_changes (
+		organization_id INT REFERENCES organizations(id) NOT NULL,
+		uuid UUID,
+		new_email VARCHAR(200) NOT NULL,
+		expiry TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '15 minutes'
+	)
 
 	CREATE TABLE needs (
 		id SERIAL PRIMARY KEY,
