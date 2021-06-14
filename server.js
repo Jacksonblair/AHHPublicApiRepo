@@ -45,8 +45,11 @@ app.use(cors({
 app.use(supertokens.middleware());
 
 // Set CORS headers
-app.use((req, res, next) => {
+app.options('*', (req, res) => {
+    res.header("Access-Control-Allow-Origin", websiteUrl);
+    // res.header("Access-Control-Allow-Methods", "POST");
     supertokens.setRelevantHeadersForOptionsAPI(res);
+    res.send("success");
 })
 
 // Endpoints
