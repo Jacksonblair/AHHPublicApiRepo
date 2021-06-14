@@ -2,7 +2,10 @@
 
 const { Pool } = require('pg')
 const pool = new Pool({
-	connectionString: process.env.DATABASE_URL + '?sslmode=require'
+	connectionString: process.env.DATABASE_URL + '?sslmode=require',
+	ssl: {
+		rejectUnauthorized: false
+	}
 }, (error) => {
 	// TODO: HANDLE ERRORS PROPERLY JESUS
 	console.log('hello', error)
