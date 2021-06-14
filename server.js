@@ -43,6 +43,9 @@ app.use(cors({
 }));
 app.use(supertokens.middleware());
 
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', websiteUrl)
+})
 
 // Endpoints
 const authEndpoints = require('./api/endpoints/auth.js')
@@ -61,7 +64,6 @@ app.use('/admin', adminEndpoints)
 
 // Supertokens error handler (has to AFTER endpoints)
 app.use(supertokens.errorHandler())
-
 
 app.listen(port, (err) => {
 	if (err) console.log(`Error: ${err}`)
