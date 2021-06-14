@@ -41,10 +41,12 @@ app.use(cors({
     allowedHeaders: ["content-type", ...supertokens.getAllCORSHeaders()],
     credentials: true,
 }));
+
 app.use(supertokens.middleware());
 
+// Set CORS headers
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', websiteUrl)
+    supertokens.setRelevantHeadersForOptionsAPI(res);
 })
 
 // Endpoints
