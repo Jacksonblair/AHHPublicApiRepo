@@ -24,8 +24,8 @@ supertokens.init({
     appInfo: {
         // learn more about this on https://supertokens.io/docs/session/appinfo
         appName: "AHH", // Example: "SuperTokens",
-        apiDomain: websiteUrl, // Example: "https://api.supertokens.io",
-        websiteDomain: serverUrl // Example: "https://supertokens.io"
+        apiDomain: serverUrl, // Example: "https://api.supertokens.io",
+        websiteDomain: websiteUrl // Example: "https://supertokens.io"
     },
     recipeList: [
         Session.init()
