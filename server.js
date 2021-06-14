@@ -12,6 +12,9 @@ let Session = require("supertokens-node/recipe/session");
 let websiteUrl = process.env.NODE_ENV == "production" ? process.env.WEBSITE_URL : "http://localhost:3000"
 let serverUrl = process.env.NODE_ENV == "production" ? process.env.SERVER_URL : "http://localhost:3001"
 
+console.log(websiteUrl)
+console.log(serverUrl)
+
 // Initialize supertokens
 supertokens.init({
     supertokens: {

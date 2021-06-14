@@ -250,28 +250,7 @@ module.exports = {
 /*
 	TABLES:
 
-	CREATE TABLE password_resets (
-		organization_id INT REFERENCES organizations(id) ON DELETE CASCADE NOT NULL,
-		uuid UUID,
-		expiry TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '15 minutes'
-	);
 
-	CREATE TABLE email_changes (
-		organization_id INT REFERENCES organizations(id) ON DELETE CASCADE NOT NULL,
-		uuid UUID,
-		new_email VARCHAR(200) NOT NULL,
-		expiry TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '15 minutes'
-	);
-
-	CREATE TABLE needs (
-		id SERIAL PRIMARY KEY,
-		major BOOL NOT NULL DEFAULT false,
-		region VARCHAR(30) NOT NULL,
-		organization_id INT REFERENCES organizations(id) ON DELETE CASCADE NOT NULL,
-		name VARCHAR(300) NOT NULL,
-		details TEXT NOT NULL,
-		created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-	);
 
 	CREATE TABLE organizations (
 		id SERiAL PRIMARY KEY,
@@ -299,6 +278,29 @@ module.exports = {
 		name VARCHAR(100) NOT NULL,
 		email VARCHAR(200) NOT NULL,
 		password_hash VARCHAR(200) NOT NULL
+	);
+
+	CREATE TABLE password_resets (
+		organization_id INT REFERENCES organizations(id) ON DELETE CASCADE NOT NULL,
+		uuid UUID,
+		expiry TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '15 minutes'
+	);
+
+	CREATE TABLE email_changes (
+		organization_id INT REFERENCES organizations(id) ON DELETE CASCADE NOT NULL,
+		uuid UUID,
+		new_email VARCHAR(200) NOT NULL,
+		expiry TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '15 minutes'
+	);
+
+	CREATE TABLE needs (
+		id SERIAL PRIMARY KEY,
+		major BOOL NOT NULL DEFAULT false,
+		region VARCHAR(30) NOT NULL,
+		organization_id INT REFERENCES organizations(id) ON DELETE CASCADE NOT NULL,
+		name VARCHAR(300) NOT NULL,
+		details TEXT NOT NULL,
+		created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 	);
 
 */
