@@ -70,8 +70,8 @@ app.use('/admin', adminEndpoints)
 // Supertokens error handler (has to AFTER endpoints)
 app.use(supertokens.errorHandler())
 
-app.listen(port, (err) => {
+app.listen(process.env.PORT || 3001, (err) => {
 	if (err) console.log(`Error: ${err}`)
-	console.log(`Listening on ${port}`)
+	console.log(`Listening`)
 	console.log(`NODE_ENV: ${process.env.NODE_ENV}`)
 })
