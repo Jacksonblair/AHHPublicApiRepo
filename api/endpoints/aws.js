@@ -4,7 +4,6 @@ const Session = require("supertokens-node/recipe/session");
 const MESSAGES = require('./util/messages.js')
 const handleErr = require('./util/errors.js')
 const mw = require('./util/middleware')
-const { createHmac } = require('crypto')
 const { S3 } = require('aws-sdk')
 const { v4: uuidv4 } = require('uuid')
 

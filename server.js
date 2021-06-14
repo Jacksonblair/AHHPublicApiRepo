@@ -9,8 +9,8 @@ const port = 3001
 let cors = require("cors");
 let supertokens = require("supertokens-node");
 let Session = require("supertokens-node/recipe/session");
-let websiteUrl = process.env.NODE_ENV == "production" ? "TODO replaceme" : "http://localhost:3000"
-let serverUrl = process.env.NODE_ENV == "production" ? "TODO replaceme" : "http://localhost:3001"
+let websiteUrl = process.env.NODE_ENV == "production" ? process.env.WEBSITE_URL : "http://localhost:3000"
+let serverUrl = process.env.NODE_ENV == "production" ? process.env.SERVER_URL : "http://localhost:3001"
 
 // Initialize supertokens
 supertokens.init({
@@ -47,12 +47,14 @@ const organizationEndpoints = require('./api/endpoints/organization.js')
 const currentNeedsEndpoints = require('./api/endpoints/currentNeeds.js')
 const facebookEndpoints = require('./api/endpoints/facebook.js')
 const awsEndpoints = require('./api/endpoints/aws.js')
+const adminEndpoints = require('./api/endpoints/admin.js')
 
 app.use('/auth', authEndpoints)
 app.use('/org', organizationEndpoints)
 app.use('/current-needs', currentNeedsEndpoints)
 app.use('/facebook-feed', facebookEndpoints)
 app.use('/aws', awsEndpoints)
+app.use('/admin', adminEndpoints)
 
 // Supertokens error handler (has to AFTER endpoints)
 app.use(supertokens.errorHandler())

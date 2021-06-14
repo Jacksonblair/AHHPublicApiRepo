@@ -14,12 +14,14 @@ const MESSAGES = {
 		UPDATED_ORG_PASSWORD: "Successfully updated password",
 		UPDATED_ORG_EMAIL: "Successfully updated e-mail",
 		GOT_ORG_PROFILE: "Got organization profile",
+		DELETED_ORG: "Successfully deleted organization",
 
 		/*Needs */
 		ADDED_NEED: "Successfully added need",
 		GOT_NEED: "Got need",
 		GOT_NEEDS: "Got needs",
 		UPDATED_NEED: "Successfully updated need",
+		DELETED_NEED: "Successfully deleted need",
 
 		/* Facebook */
 		GOT_FACEBOOK_FEED: "Successfully got Facebook feed",
@@ -27,6 +29,7 @@ const MESSAGES = {
 	},
 	ERROR: {
 		GENERIC: "Server error",
+		NOT_ADMIN: "Admin only route",
 
 		/* Org */
 		NOT_ORG_OWNER: "You do not own this organization",
@@ -34,17 +37,17 @@ const MESSAGES = {
 
 		CANT_UPDATE_ORG_PROFILE: "Could not update organization account details",
 		CANT_UPDATE_ORG_ABOUT: "Could not update organization 'About'",
-
 		COULD_NOT_ADD_ORG: "Could not add organization",
-
 		CANT_GET_ORG_PROFILE: "Could not get organization profile",
 		ORG_DOES_NOT_EXIST: "Organization details could not be found",
+		CANT_DELETE_ORG: "Could not delete organization",
 
 		/* Needs */
 		CANT_ADD_NEED: "Could not add need",
 		CANT_GET_NEED: "Could not get need",
 		CANT_GET_NEEDS: "Could not get needs",
 		CANT_UPDATE_NEED: "Could not update need",
+		CANT_DELETE_NEED: "Could not delete need",
 
 
 		/* Auth */

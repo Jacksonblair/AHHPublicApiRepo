@@ -4,9 +4,13 @@ const queries = require('../db/queries.js')
 const MESSAGES = require('./util/messages.js')
 const handleErr = require('./util/errors.js')
 
-router.get('/', async (req, res) => {
+router.get('/:region', async (req, res) => {
+	
+	// TODO: Get current needs based on region param
+	// TODO: Validate region
+
 	try {
-		let result = await queries.getCurrentNeeds()
+		let result = await queries.getCurrentNeeds(req.params.region)
 		res.status(200).send({ message: MESSAGES.SUCCESS.GOT_CURRENT_NEEDS, needs: result.rows })
 	} catch(err) {
 		handleErr(err)

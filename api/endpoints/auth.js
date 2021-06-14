@@ -23,54 +23,16 @@ const saltRounds = 10;
 	- (POST) admin login
 */
 
-router.post('/admin/add', async (req, res) => {
-	/* Should put an extra layer of security here */
-	res.status(400).send()
-})
-
-router.post('/admin/login', async (req, res) => {
-
-	try {
-		let result = await getAdminByEmail(req.body.email)
-		let passwordsMatch = await bcrypt.compare(req.body.password, result.rows[0].password_hash)
-
-		if (!passwordsMatch) {
-			res.status(400).send({ message: MESSAGES.ERROR.INCORRECT_CREDENTIALS })
-			return
-		}
-
-	    await Session.createNewSession(res, db_response.rows[0].id.toString(), 
-	    { // JWT payload
-	    	email: result.rows[0].email,
-	    	role: "admin"
-	    });
-	    res.status(200).send({ message: MESSAGES.SUCCESS.LOGGED_IN })	
-
-	} catch(err) {
-		handleErr(err)
-		res.status(400).send({ message: MESSAGES.ERROR.CANT_LOG_IN })
-	}
-
-})
-
-
-
 router.get('/confirm-update-email/:uuid', Session.verifySession({sessionRequired: false}), async (req, res) => {
 
 	try {
-		let result = await queries.findEmailChangeByUuid(req.params.uuid)
-		if (!result.rows[0]) throw('')
-
-		let orgId = result.rows[0].organization_id
-		let newEmail = result.rows[0].new_email
-
-		let _result = await queries.updateOrganizationEmailById(orgId, newEmail)
-		await queries.nullifyEmailChange(req.params.uuid)
+		await queries.confirmUpdateEmail(req.params.uuid)
 
 		if (req.session !== undefined) {
 			console.log("Killing session")
 			await req.session.revokeSession()
 		}
+
 		res.status(200).send({ message: MESSAGES.SUCCESS.UPDATED_ORG_EMAIL })	
 
 	} catch(err) {
@@ -139,22 +101,13 @@ router.post('/complete-reset-password/:uuid', Session.verifySession({sessionRequ
 	// And update that organizations email to it
 
 	try {
-		let result = await queries.findPasswordResetByUuid(req.params.uuid)
-		if (!result.rows[0]) throw('')
-
-		let orgId = result.rows[0].organization_id	
-		let newPasswordHash = await bcrypt.hash(req.body.newPassword, saltRounds)
-
-		let _result = await queries.updateOrganizationPasswordHashById(orgId, newPasswordHash)	
-		if (!_result.rowCount == 1) throw('')
-
-		let __result = await queries.nullifyPasswordReset(req.params.uuid)
-		if (!__result.rowCount == 1) throw('')
+		await queries.completePasswordReset(req.params.uuid, req.body.newPassword)
 
 		if (req.session !== undefined) {
 			await req.session.revokeSession()
 		}		
-		res.status(200).send({ message: MESSAGES.SUCCESS.UPDATED_ORG_EMAIL })							
+
+		res.status(200).send({ message: MESSAGES.SUCCESS.UPDATED_ORG_PASSWORD })							
 
 	} catch(err) {
 		handleErr(err)

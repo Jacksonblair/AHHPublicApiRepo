@@ -24,7 +24,7 @@ router.put('/:orgid/profile', Session.verifySession(), mw.verifyOrgOwner, async 
 	// TODO: Valiate profile details
 
 	try {
-		let result = await queries.updateOrganizationProfile(req.session.getUserId(), req.body)
+		let result = await queries.updateOrganizationProfile(req.params.orgid, req.body)
 		if (result.rowCount = 1) {
 			res.status(200).send({ message: MESSAGES.SUCCESS.UPDATED_ORG_PROFILE})
 		} else {
@@ -36,6 +36,30 @@ router.put('/:orgid/profile', Session.verifySession(), mw.verifyOrgOwner, async 
 	}
 
 })
+
+/* Delete org */
+router.delete('/:orgid', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
+
+	/* TODO: Let orgs get deleted this easily? Should we save the details incase its a mistake? */
+	/*  */
+
+
+	try {
+		let result = await queries.deleteOrganization(req.params.orgid)
+		if (result.rowCount = 1) {
+			await req.session.revokeSession()
+			res.status(200).send({ message: MESSAGES.SUCCESS.DELETED_ORG})
+		} else {
+			res.status(400).send({ message: MESSAGES.ERROR.CANT_DELETE_ORG})
+		}
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send({ message: MESSAGES.ERROR.CANT_DELETE_ORG})
+	}
+
+
+})
+
 
 /* Update org profile image details */
 router.put('/:orgid/image', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
@@ -74,6 +98,7 @@ router.put('/:orgid/about', Session.verifySession(), mw.verifyOrgOwner, async (r
 router.post('/:orgid/needs/add', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
 	
 	// TODO: Validate need
+	console.log(req.body)
 	
 	try {
 		let result = await queries.insertNeed(req.session.getUserId(), req.body)
@@ -92,6 +117,17 @@ router.get('/:orgid/needs/:needid', async (req, res) => {
 	} catch(err) {
 		handleErr(err)
 		res.status(400).send({ message: MESSAGES.ERROR.CANT_GET_NEED })
+	}
+})
+
+/* Delete need */
+router.delete('/:orgid/needs/:needid', async (req, res) => {
+	try {
+		let result = await queries.deleteNeed(req.params.needid)
+		res.status(200).send({ message: MESSAGES.SUCCESS.DELETED_NEED })
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send({ message: MESSAGES.ERROR.CANT_DELETE_NEED })	
 	}
 })
 
