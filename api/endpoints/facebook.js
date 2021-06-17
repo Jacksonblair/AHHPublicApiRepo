@@ -19,9 +19,6 @@ const getJSON = bent('json')
 */
 
 
-
-
-
 router.get('/:region', async (req, res) => {
 
 	// TODO: Get facebook feed based on region param

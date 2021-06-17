@@ -22,9 +22,15 @@ const MESSAGES = {
 		GOT_NEEDS: "Got needs",
 		UPDATED_NEED: "Successfully updated need",
 		DELETED_NEED: "Successfully deleted need",
+		SENT_FULFIL_NEED_NOTIFICATION: "Successfully sent fulfil need notification",
 
 		/* Facebook */
 		GOT_FACEBOOK_FEED: "Successfully got Facebook feed",
+
+		/* Admin */
+		TOGGLED_NEED_MAJOR: "Successfully toggled need 'major' flag",
+		GOT_ALL_ORGS: "Successfully got all organizations",
+		TOGGLED_ORG_APPROVAL: "Successfully toggled organization 'approval' flag",
 
 	},
 	ERROR: {
@@ -34,6 +40,7 @@ const MESSAGES = {
 		/* Org */
 		NOT_ORG_OWNER: "You do not own this organization",
 		INVALID_ORG_DETAILS: "Organization details are invalid",
+		ORG_NOT_APPROVED: "Organization is not approved",
 
 		CANT_UPDATE_ORG_PROFILE: "Could not update organization account details",
 		CANT_UPDATE_ORG_ABOUT: "Could not update organization 'About'",
@@ -48,6 +55,9 @@ const MESSAGES = {
 		CANT_GET_NEEDS: "Could not get needs",
 		CANT_UPDATE_NEED: "Could not update need",
 		CANT_DELETE_NEED: "Could not delete need",
+		INVALID_NEED: "Need details are invalid",
+		INVALID_REGION: "Region is invalid",
+		INVALID_FULFILMENT_DETAILS: "Fulfilment details are invalid", 
 
 
 		/* Auth */
@@ -60,9 +70,18 @@ const MESSAGES = {
 		INCORRECT_EXISTING_PASSWORD: "Existing password was incorrect",
 		COULD_NOT_CONFIRM_EMAIL_CHANGE: "Could not confirm e-mail change",
 		COULD_NOT_COMPLETE_PASSWORD_RESET: "Could not complete password reset",
+		PASSWORD_RESET_EXPIRED_OR_NOT_EXIST: "Password reset has expired or does not exist",
+		PASSWORD_SAME_AS_PREVIOUS: "New password cannot be the same as the previous password",
+		EMAIL_ALREADY_IN_USE: "E-mail is already in use",
+		EMAIL_MUST_BE_DIFFERENT: "New e-mail must be different from your current one",
 
 		/* Facebook */
 		COULD_NOT_GET_FACEBOOK_FEED: "Could not get facebook feed",
+
+		/* Admin */
+		COULD_NOT_GET_ALL_ORGS: "Could not get all organizations",
+		CANT_TOGGLE_ORG_APPROVAL: "Could not toggle organization 'approval' field",
+
 	}
 }
 

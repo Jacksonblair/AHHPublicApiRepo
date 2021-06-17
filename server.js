@@ -4,6 +4,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
 const port = 3001
+const scheduler = require('./scheduler')
 
 // Set up supertokens
 let cors = require("cors");
@@ -46,10 +47,12 @@ app.use(supertokens.middleware());
 
 // Set CORS headers
 app.options('*', (req, res) => {
-    res.header("Access-Control-Allow-Origin", websiteUrl);
-    // res.header("Access-Control-Allow-Methods", "POST");
-    supertokens.setRelevantHeadersForOptionsAPI(res);
-    res.send("success");
+    if (process.env.NODE_ENV == 'production') {
+        res.header("Access-Control-Allow-Origin", websiteUrl);
+        // res.header("Access-Control-Allow-Methods", "POST");
+        supertokens.setRelevantHeadersForOptionsAPI(res);
+        res.send("success");      
+    }
 })
 
 // Endpoints
@@ -69,6 +72,9 @@ app.use('/admin', adminEndpoints)
 
 // Supertokens error handler (has to AFTER endpoints)
 app.use(supertokens.errorHandler())
+
+// Start 'scheduler'
+scheduler.start()
 
 app.listen(process.env.PORT || 3001, (err) => {
 	if (err) console.log(`Error: ${err}`)

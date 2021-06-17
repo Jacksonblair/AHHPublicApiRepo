@@ -4,12 +4,11 @@ const { v4: uuidv4 } = require('uuid')
 // Create SES service object.
 const sesClient = new SESClient({ region: process.env.AWS_REGION });
 
-let generateParams = (destination, content) => {
+let generateParams = (destination, content, subject) => {
     return {
         Destination: {
             /* required */
-            ToAddresses: [
-                destination //RECEIVER_ADDRESS
+            ToAddresses: [ destination
                 /* more To-email addresses */
             ],
         },
@@ -19,16 +18,12 @@ let generateParams = (destination, content) => {
                 /* required */
                 Html: {
                     Charset: "UTF-8",
-                    Data: `<div> ${content} </div>`,
-                },
-                Text: {
-                    Charset: "UTF-8",
-                    Data: `Hello does this survive`,
-                },
+                    Data: content,
+                }
             },
             Subject: {
                 Charset: "UTF-8",
-                Data: "EMAIL_SUBJECT",
+                Data: subject,
             },
         },
         Source: "jackson.blair@live.com" // SENDER_ADDRESS    
@@ -37,17 +32,16 @@ let generateParams = (destination, content) => {
 
 module.exports = {
 
-    sendPasswordResetCode: (uuid) => {
+    sendPasswordResetCode: (destination, uuid) => {
 
-        let baseUrl = process.env.NODE_ENV == "development" ? "http://localhost:3000" : "TODO GET SERVER URL"
-        let confirmationLink = `${baseUrl}/complete-reset-password/${uuid}`
+        let confirmationLink = `${getBaseUrl()}/complete-reset-password/${uuid}`
         let content = `
             <div>
                 <p> Please click the link to set a new password. If you did not request this change, please ignore this e-mail. This link will expire in 15 minutes. </p>
                 <a href="${confirmationLink}">${confirmationLink}</a>
             </div>
         `
-        let params = generateParams("jtblair@deakin.edu.au", content)
+        let params = generateParams("jtblair@deakin.edu.au", content, "ahelpinghand.com Password reset confirmation")
         let command = new SendEmailCommand(params);
         return sesClient.send(command)
 
@@ -55,36 +49,69 @@ module.exports = {
 
     sendEmailChangeConfirmationRequest: (destination, uuid) => {
 
-        let baseUrl = process.env.NODE_ENV == "development" ? "http://localhost:3000" : "TODO GET SERVER URL"
-        let confirmationLink = `${baseUrl}/confirm-update-email/${uuid}`
+        let confirmationLink = `${getBaseUrl()}/confirm-update-email/${uuid}`
         let content = `
             <div>
                 <p> Please click the link to confirm your e-mail change. If you did not request this change, please ignore this e-mail. This link will expire in 15 minutes. </p>
                 <a href="${confirmationLink}">${confirmationLink}</a>
             </div>
         `
-        let params = generateParams("jtblair@deakin.edu.au", content)
-        // "Please click link to confirm your e-mail change. If you did not request this change, please ignore this e-mail. "
+        let params = generateParams("jtblair@deakin.edu.au", content, "ahelpinghand.com Email change confirmation")
         
         let command = new SendEmailCommand(params);
         return sesClient.send(command)
     },
 
-    sendEmail: async (destination,) => {
-        // let command = new SendEmailCommand(params);
+    sendFulfilledNeedNotification: (destination, details, need) => {
 
-        // sesClient.send(command)
-        // .then(res => {
-        //     console.log("success")
-        //     console.log(res)
-        // })
-        // .catch(err => {
-        //     console.log(err.message)
-        //     const { requestId, cfId, extendedRequestId } = err.$metadata;
-        //     console.log({ requestId, cfId, extendedRequestId });
-        // })
-    }
+        let content = `
+            <div>
+                <p> ${details.contact_name} has left a message regarding fulfilment of ${need.name} </p>
+                <p> MESSAGE CONTENTS </p>
+                <p> ${details.message} </p>
+                <p> Contact details </p>
+                <p> Phone: ${details.contact_number ? details.contact_number : "None provided"} </p>
+                <p> Email: ${details.email ? details.email : "None provided"} </p>
+                <p> If this need is now fulfilled, please follow 
+                    <a href="${getBaseUrl()}/org/${need.organization_id}/needs/${need.id}/delete"> this link </a> 
+                to delete it. </p>
+            </div>
+        `
+
+        let params = generateParams("jtblair@deakin.edu.au", content, `ahelpinghand.com Need details notification for ${need.name}`)
+
+        let command = new SendEmailCommand(params);
+        return sesClient.send(command)
+    },
+
+    sendFulfilledNeedReminder: (destination, details, need) => {
+
+        let content = `
+            <div>
+                <p> ${details.contact_name} has left a message regarding fulfilment of ${need.name} </p>
+                <p> MESSAGE CONTENTS </p>
+                <p> ${details.message} </p>
+                <p> Contact details </p>
+                <p> Phone: ${details.contact_number ? details.contact_number : "None provided"} </p>
+                <p> Email: ${details.email ? details.email : "None provided"} </p>
+                <p> If this need is now fulfilled, please follow 
+                    <a href="${getBaseUrl()}/org/${need.organization_id}/needs/${need.id}/delete"> this link </a> 
+                to delete it. </p>
+            </div>
+        `
+
+        let params = generateParams("jtblair@deakin.edu.au", content, `ahelpinghand.com Need details notification for ${need.name}`)
+
+        let command = new SendEmailCommand(params);
+        return sesClient.send(command)
+    },
+
+
+
 
 }
 
-
+let getBaseUrl = () => {
+    let url = process.env.NODE_ENV == "development" ? "http://localhost:3000" : "https://ahelpinghandclient.herokuapp.com"
+    return url
+}

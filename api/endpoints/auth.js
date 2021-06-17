@@ -57,15 +57,27 @@ router.post('/org/:orgid/change-email', Session.verifySession(), mw.verifyOrgOwn
 	let uuid = uuidv4()
 
 	try {
-		let result = await queries.insertEmailChange(uuid, userId, req.body.email)
+		// Confirm e-mail is unique first
+		let result = await queries.getOrganizationByEmail(req.body.email)
+		if (result.rows[0]) {
+			if (result.rows[0].id == userId) {
+				// Can't change our e-mail to the one we already have
+				throw(MESSAGES.ERROR.EMAIL_MUST_BE_DIFFERENT)
+			} else {
+				// E-mail already in use
+				throw(MESSAGES.ERROR.EMAIL_ALREADY_IN_USE)
+			}
+		}
+
+		await queries.insertEmailChange(uuid, userId, req.body.email)
 		// After inserting row in DB, send a confirmation request to current e-mail address
 		// This will include a link confirm the UUID against the database entry
 		// After which the users email will be updated
 		await email.sendEmailChangeConfirmationRequest(currentEmail, uuid)
 		res.status(200).send({ message: MESSAGES.SUCCESS.SENT_EMAIL_CHANGE_CONFIRMATION})
-	} catch(e) {
+	} catch(err) {
 		handleErr(err)
-		res.status(400).send({ message: MESSAGES.ERROR.GENERIC})
+		res.status(400).send({ message: err })
 	}
 
 })
@@ -97,21 +109,26 @@ router.get('/org/:orgid/reset-password', Session.verifySession(), mw.verifyOrgOw
 router.post('/complete-reset-password/:uuid', Session.verifySession({sessionRequired: false}), async (req, res) => {
 
 	// Try to find uuid in 'passwordResets' table 
-	// If found, use the org id and the new password details in stored in that table
-	// And update that organizations email to it
+	// If we find it, overwrite the password in the corresponding organizations row with the supplied password
 
 	try {
+		// Validate password
+		if (!validatePassword(req.body.newPassword)) {
+			throw(MESSAGES.ERROR.INVALID_NEW_PASSWORD)
+		}
+
 		await queries.completePasswordReset(req.params.uuid, req.body.newPassword)
 
+		// If logged in, log them out to force log in with new password
 		if (req.session !== undefined) {
 			await req.session.revokeSession()
-		}		
+		}
 
 		res.status(200).send({ message: MESSAGES.SUCCESS.UPDATED_ORG_PASSWORD })							
 
 	} catch(err) {
 		handleErr(err)
-		res.status(400).send({ message: MESSAGES.ERROR.COULD_NOT_COMPLETE_PASSWORD_RESET})
+		res.status(400).send({ message: err })
 	}
 
 })
@@ -148,11 +165,7 @@ router.post('/org/:orgid/update-password', Session.verifySession(), mw.verifyOrg
 /* Registering a new organization */
 router.post('/org/add', async (req, res) => {
 
-	// TODO: Make sure email used to register is unique
-
-	let newOrg = req.body
-
-	if (!validation.validateOrganization(newOrg)) {
+	if (!validation.validateOrganization(req.body)) {
 		res.status(400).send({ message: MESSAGES.ERROR.INVALID_ORG_DETAILS })
 		return
 	}
@@ -163,12 +176,18 @@ router.post('/org/add', async (req, res) => {
 	// We dont start a session until they log in 
 
 	try {
-		newOrg.password = await bcrypt.hash(newOrg.password, saltRounds)
-		await queries.insertOrganization(newOrg)
+		// Make sure email used to register is unique
+		let orgs = await queries.getOrganizationByEmail(req.body.email.toLowerCase())
+		if (orgs.rows[0]) {
+			throw(MESSAGES.ERROR.EMAIL_ALREADY_IN_USE)
+		}
+
+		req.body.password = await bcrypt.hash(req.body.password, saltRounds)
+		await queries.insertOrganization(req.body)
 		res.status(200).send({ message: MESSAGES.SUCCESS.ADDED_ORG })	
 	} catch(err) {
 		handleErr(err)
-		res.status(400).send({ message: MESSAGES.ERROR.COULD_NOT_ADD_ORG })	
+		res.status(400).send({ message: err })	
 	}
 })
 

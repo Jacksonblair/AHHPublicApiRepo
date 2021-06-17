@@ -6,6 +6,8 @@ const auth = require('../auth/index.js')
 const MESSAGES = require('./util/messages.js')
 const handleErr = require('./util/errors.js')
 const mw = require('./util/middleware')
+const validation = require('./util/validation')
+const email = require('./util/email')
 
 /* Get org profile details */
 router.get('/:orgid/profile', async (req, res) => {
@@ -22,6 +24,10 @@ router.get('/:orgid/profile', async (req, res) => {
 router.put('/:orgid/profile', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
 
 	// TODO: Valiate profile details
+	if (!validation.validateUpdateOrganization(req.body)) {
+		res.status(400).send({ message: MESSAGES.ERROR.CANT_UPDATE_ORG_PROFILE})
+		return
+	}
 
 	try {
 		let result = await queries.updateOrganizationProfile(req.params.orgid, req.body)
@@ -95,10 +101,15 @@ router.put('/:orgid/about', Session.verifySession(), mw.verifyOrgOwner, async (r
 })
 
 /* Add need */
-router.post('/:orgid/needs/add', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
+router.post('/:orgid/needs/add', Session.verifySession(), mw.verifyOrgOwner, mw.verifyApproved, async (req, res) => {
 	
-	// TODO: Validate need
 	console.log(req.body)
+
+	// Validate need
+	if (!validation.validateNeed(req.body)) {
+		res.status(400).send({ message: MESSAGES.ERROR.INVALID_NEED })
+		return
+	}
 	
 	try {
 		let result = await queries.insertNeed(req.session.getUserId(), req.body)
@@ -144,19 +155,57 @@ router.get('/:orgid/needs/', async (req, res) => {
 
 /* Update a need */
 router.put('/:orgid/needs/:needid', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
+
+	// Validate new need details
+	if (!validation.validateNeed(req.body)) {
+		res.status(400).send({ message: MESSAGES.ERROR.INVALID_NEED })
+		return
+	}
+
 	try {
 		let result = await queries.updateNeed(req.params.needid, req.body)
 		res.status(200).send({ message: MESSAGES.SUCCESS.UPDATED_NEED })
 	} catch(err) {
 		handleErr(err)
-		res.status(400).send({ message: MESSAGEs.ERROR.CANT_UPDATE_NEED })
+		res.status(400).send({ message: MESSAGES.ERROR.CANT_UPDATE_NEED })
 	}
 })
 
-/* Delete a need */
-router.delete('/:orgid/needs/:needid/', async (req, res) => {
+/* Fulfil a need*/
+router.post('/:orgid/needs/:needid/fulfil', async (req, res) => {
 
+	res.status(400).send({ message: "Sorry still working on this!"})
+
+	// // We validate the details of the fulfilment
+	// if (!validation.validateFulfilment(req.body)) {
+	// 	res.status(400).send({ message: MESSAGES.ERROR.INVALID_FULFILMENT_DETAILS })
+	// 	return
+	// }
+
+	// try {
+	// 	// TODO: Single query?? 
+
+	// 	// Get e-mail of organization & targeted need
+	// 	let result = await queries.getOrganizationEmailbyId(req.params.orgid)
+	// 	let _result = await queries.getNeed(req.params.needid)
+
+	// 	if (result.rows[0] && _result.rows[0]) {
+
+	// 		// Add a 'reminder' to the database
+	// 		await queries.addNeedFulfilledReminder(_result.rows[0].id)
+
+	// 		let orgEmail = result.rows[0].email
+	// 		let need = _result.rows[0]
+	// 		await email.sendFulfilledNeedNotification(orgEmail, req.body, need)
+	// 		res.status(200).send({ message: MESSAGES.SUCCESS.SENT_FULFIL_NEED_NOTIFICATION })
+	// 	} else {
+	// 		res.status(400).send({ message: MESSAGES.ERROR.CANT_GET_ORG_PROFILE })
+	// 	}
+	// } catch (err) {
+	// 	handleErr(err)
+	// }
 
 })
+
 
 module.exports = router

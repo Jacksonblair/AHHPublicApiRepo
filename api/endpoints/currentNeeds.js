@@ -6,11 +6,19 @@ const handleErr = require('./util/errors.js')
 
 router.get('/:region', async (req, res) => {
 	
-	// TODO: Get current needs based on region param
-	// TODO: Validate region
+	// Validate region
+	if (!["geelong", "corangamite", "warnambool", "all"].includes(req.params.region)) {
+		res.status(400).send({ message: MESSAGES.ERROR.INVALID_REGION })
+		return
+	}
 
 	try {
-		let result = await queries.getCurrentNeeds(req.params.region)
+		let result 
+		if (req.params.region == "all") {
+			result = await queries.getCurrentNeeds()
+		} else {
+			result = await queries.getCurrentNeedsByRegion(req.params.region)
+		}
 		res.status(200).send({ message: MESSAGES.SUCCESS.GOT_CURRENT_NEEDS, needs: result.rows })
 	} catch(err) {
 		handleErr(err)
