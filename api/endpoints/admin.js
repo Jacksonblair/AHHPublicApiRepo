@@ -51,7 +51,7 @@ router.put('/needs/:needid/toggle-major', Session.verifySession(), mw.verifyAdmi
 router.put('/org/:orgid/toggle-approved', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
 	try {
 		await queries.toggleOrganizationApproved(req.params.orgid)
-		let updatedOrganizations = await queries.getAllOrganizations()
+		let updatedOrganizations = await queries.adminGetAllOrganizations()
 		res.status(200).send({ message: MESSAGES.SUCCESS.TOGGLED_ORG_APPROVAL, orgs: updatedOrganizations.rows })
 	} catch(err) {
 		handleErr(err)
