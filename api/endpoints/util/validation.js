@@ -10,6 +10,8 @@ module.exports = {
 
 	validateOrganization: (values) => {
 
+		console.log(values)
+
 		// Sanitize all fields
 		for (let value in values) {
 			value = sanitizeHtml(value)
@@ -88,7 +90,7 @@ module.exports = {
 	},
 
 	validateFulfilment: (details) => {
-		
+
 		// Sanitize all fields
 		for (let value in details) {
 			details[value] = sanitizeHtml(details[value])
