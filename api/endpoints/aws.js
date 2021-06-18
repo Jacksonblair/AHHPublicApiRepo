@@ -36,6 +36,7 @@ router.get('/signed-policy/:orgid', Session.verifySession(), mw.verifyOrgOwner, 
 			Expires: 3000,
 			Bucket: process.env.AWS_BUCKET_NAME
 		})
+		console.log(signed)
 		res.status(200).send({ message: "Succesfully generated signed policy", signed })
 	} catch(err) {
 		handleErr(err)
