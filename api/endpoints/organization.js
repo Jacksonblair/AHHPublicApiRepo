@@ -69,6 +69,9 @@ router.delete('/:orgid', Session.verifySession(), mw.verifyOrgOwner, async (req,
 
 /* Update org profile image details */
 router.put('/:orgid/image', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
+
+	console.log(req.body)
+
 	try {
 		let result = await queries.updateOrganizationImage(req.session.getUserId(), `https://s3.ap-southeast-2.amazonaws.com/ahelpinghandimagebucket/${req.body.uuid}`)
 		if (result.rowCount == 1) {
