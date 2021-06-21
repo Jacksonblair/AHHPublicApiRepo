@@ -15,7 +15,7 @@ module.exports = (url, need) => {
 		</body>
 
 		<script>
-			window.location.replace = ${url}
+			window.location.replace(${url})
 		</script>
 	</html>
 `}
