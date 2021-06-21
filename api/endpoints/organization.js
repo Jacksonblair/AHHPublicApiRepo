@@ -127,7 +127,7 @@ router.post('/:orgid/needs/add', Session.verifySession(), mw.verifyOrgOwner, mw.
 /* Get need */
 router.get('/:orgid/needs/:needid', async (req, res) => {
 
-	console.log(req.hostname)
+	console.log(req.headers)
 
 	try {
 		let result = await queries.getNeed(req.params.needid)
