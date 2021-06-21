@@ -6,7 +6,7 @@ module.exports = (url, need) => {
 		<head>
 		    <meta property="og:url"                content="${url}" />
 		    <meta property="ia:markup_url"         content="${url}" />
-		    <meta property="og:type"               content="article" />
+		    <meta property="og:type"               content="website" />
 		    <meta property="og:title"              content="A Helping Hand: ${need.name}" />
 		    <meta property="og:description"        content="Fulfil this need: \"${need.details}\" " />
 		    <meta property="og:image"              content="https://www.planetware.com/wpimages/2020/02/france-in-pictures-beautiful-places-to-photograph-eiffel-tower.jpg" />
