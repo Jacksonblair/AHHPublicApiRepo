@@ -8,6 +8,7 @@ const handleErr = require('./util/errors.js')
 const mw = require('./util/middleware')
 const validation = require('./util/validation')
 const email = require('./util/email')
+const needMetaTags = require('./util/needMetaTags.js')
 
 /* Get org profile details */
 router.get('/:orgid/profile', async (req, res) => {
@@ -125,9 +126,18 @@ router.post('/:orgid/needs/add', Session.verifySession(), mw.verifyOrgOwner, mw.
 
 /* Get need */
 router.get('/:orgid/needs/:needid', async (req, res) => {
+
+	console.log(req.get('host'))
 	try {
 		let result = await queries.getNeed(req.params.needid)
-		res.status(200).send({ message: MESSAGES.SUCCESS.GOT_NEED, need: result.rows[0] })
+		
+		// Alternate response for any other website aside from our client
+		// Basically just to send correct Meta tags to facebook for sharing needs
+		if (req.get('host').includes("ahelpinghand") || req.get('host').includes('localhost')) {
+			res.status(200).send({ message: MESSAGES.SUCCESS.GOT_NEED, need: result.rows[0] })
+		} else {
+			res.send(needMetaTags)
+		}
 	} catch(err) {
 		handleErr(err)
 		res.status(400).send({ message: MESSAGES.ERROR.CANT_GET_NEED })
@@ -135,7 +145,7 @@ router.get('/:orgid/needs/:needid', async (req, res) => {
 })
 
 /* Delete need */
-router.delete('/:orgid/needs/:needid', async (req, res) => {
+router.delete('/:orgid/needs/:needid', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
 	try {
 		let result = await queries.deleteNeed(req.params.needid)
 		res.status(200).send({ message: MESSAGES.SUCCESS.DELETED_NEED })
@@ -174,39 +184,65 @@ router.put('/:orgid/needs/:needid', Session.verifySession(), mw.verifyOrgOwner, 
 	}
 })
 
+/* Extend a need */
+router.get('/:orgid/needs/:needid/extend', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
+	try {
+		let result = await queries.extendNeed(req.params.needid)
+		res.status(200).send({ message: MESSAGES.SUCCESS.EXTENDED_NEED })
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send({ message: MESSAGES.ERROR.CANT_EXTEND_NEED })	
+	}
+})
+
 /* Fulfil a need*/
-router.post('/:orgid/needs/:needid/fulfil', async (req, res) => {
+router.post('/:orgid/needs/:needid/fulfil', Session.verifySession({sessionRequired: false}), async (req, res) => {
 
-	res.status(400).send({ message: "Sorry still working on this!"})
+	// res.status(400).send({ message: "Sorry still working on this!"})
 
-	// // We validate the details of the fulfilment
-	// if (!validation.validateFulfilment(req.body)) {
-	// 	res.status(400).send({ message: MESSAGES.ERROR.INVALID_FULFILMENT_DETAILS })
-	// 	return
-	// }
+	// We validate the details of the fulfilment
+	if (!validation.validateFulfilment(req.body)) {
+		res.status(400).send({ message: MESSAGES.ERROR.INVALID_FULFILMENT_DETAILS })
+		return
+	}
 
-	// try {
-	// 	// TODO: Single query?? 
+	// Make sure its not the owner fulfilling the need
+	if (req.session) {
+		let userId = req.session.getUserId()
+		if (userId == req.params.orgid) {
+			res.status(400).send({ message: MESSAGES.ERROR.CANNOT_FULFIL_OWN_NEED })
+			return
+		}
+	}
 
-	// 	// Get e-mail of organization & targeted need
-	// 	let result = await queries.getOrganizationEmailbyId(req.params.orgid)
-	// 	let _result = await queries.getNeed(req.params.needid)
+	// Make sure not an admin fulfilling need
+	if (req.session.getJWTPayload()["role"] == "admin") {
+		res.status(400).send({ message: MESSAGES.ERROR.ADMIN_CANNOT_FULFIL_NEED })
+		return
+	}
 
-	// 	if (result.rows[0] && _result.rows[0]) {
+	try {
+		// TODO: Get a client instead of lots of indiv. queries ??
 
-	// 		// Add a 'reminder' to the database
-	// 		await queries.addNeedFulfilledReminder(_result.rows[0].id)
+		// Get e-mail of organization & targeted need
+		let result = await queries.getOrganizationEmailbyId(req.params.orgid)
+		let _result = await queries.getNeed(req.params.needid)
 
-	// 		let orgEmail = result.rows[0].email
-	// 		let need = _result.rows[0]
-	// 		await email.sendFulfilledNeedNotification(orgEmail, req.body, need)
-	// 		res.status(200).send({ message: MESSAGES.SUCCESS.SENT_FULFIL_NEED_NOTIFICATION })
-	// 	} else {
-	// 		res.status(400).send({ message: MESSAGES.ERROR.CANT_GET_ORG_PROFILE })
-	// 	}
-	// } catch (err) {
-	// 	handleErr(err)
-	// }
+		if (result.rows[0] && _result.rows[0]) {
+
+			// Add a 'reminder' to the database (adding need id and org id)
+			await queries.addFulfilledNeedReminder(_result.rows[0].id, req.params.orgid)
+
+			let orgEmail = result.rows[0].email
+			let need = _result.rows[0]
+			await email.sendFulfilledNeedNotification(orgEmail, req.body, need)
+			res.status(200).send({ message: MESSAGES.SUCCESS.SENT_FULFIL_NEED_NOTIFICATION })
+		} else {
+			res.status(400).send({ message: MESSAGES.ERROR.CANT_GET_ORG_PROFILE })
+		}
+	} catch (err) {
+		handleErr(err)
+	}
 
 })
 

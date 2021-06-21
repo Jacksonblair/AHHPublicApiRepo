@@ -84,23 +84,22 @@ module.exports = {
         return sesClient.send(command)
     },
 
-    sendFulfilledNeedReminder: (destination, details, need) => {
+    sendFulfilledNeedReminder: (destination, reminder) => {
 
         let content = `
             <div>
-                <p> ${details.contact_name} has left a message regarding fulfilment of ${need.name} </p>
-                <p> MESSAGE CONTENTS </p>
-                <p> ${details.message} </p>
-                <p> Contact details </p>
-                <p> Phone: ${details.contact_number ? details.contact_number : "None provided"} </p>
-                <p> Email: ${details.email ? details.email : "None provided"} </p>
-                <p> If this need is now fulfilled, please follow 
-                    <a href="${getBaseUrl()}/org/${need.organization_id}/needs/${need.id}/delete"> this link </a> 
-                to delete it. </p>
+                <p> Hi, this is a reminder about your need: ${reminder.name} </p>
+                <p> The need is marked as fulfilled, but is still listed. </p>
+                <p> We understand that the need may be ongoing, but if it is not, please delete it
+                    <a href="${getBaseUrl()}/org/${reminder.organization_id}/needs/${reminder.need_id}/delete"> here </a> 
+                <br/>
+                </p> To 'extend' the need and avoid it being marked as 'inactive', please click
+                    <a href="${getBaseUrl()}/org/${reminder.organization_id}/needs/${reminder.need_id}/extend"> here </a> 
+                </p>
             </div>
         `
 
-        let params = generateParams("jtblair@deakin.edu.au", content, `ahelpinghand.com Need details notification for ${need.name}`)
+        let params = generateParams("jtblair@deakin.edu.au", content, `ahelpinghand.com Need details notification for ${reminder.name}`)
 
         let command = new SendEmailCommand(params);
         return sesClient.send(command)

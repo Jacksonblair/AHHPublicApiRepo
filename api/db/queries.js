@@ -48,6 +48,19 @@ module.exports = {
 		FROM organizations`)
 	},
 
+	adminGetAllNeeds: () => {
+		return db.query(`
+		SELECT needs.*,
+		(NOW() - target_date) AS time_expired
+		FROM needs JOIN fulfilled_need_reminders 
+		ON needs.id = fulfilled_need_reminders.need_id
+		`)
+	},
+
+
+
+	/* Org queries */
+
 	getOrganizationProfileById: (id) => {
 		return db.query(`SELECT 
 		id,
@@ -197,8 +210,6 @@ module.exports = {
 		return db.query(`DELETE FROM needs WHERE id = $1`, [id])
 	},
 
-// SELECT needs.id, needs.name, organization_name FROM needs JOIN organizations ON needs.organization_id = organizations.id;
-
 	getNeed: (id) => {
 		return db.query(`SELECT 
 			needs.*,
@@ -319,18 +330,37 @@ module.exports = {
 		}
 
 		client.release()
-	}
+	},
+
+
 
 
 	/* Reminders */
 
-	// addFulfilledNeedReminder: (id) => {
-	// 	return db.query(`INSERT INTO fulfilled_need_reminders (need_id) VALUES ($1)`, [id])
-	// },
+	// Add fulfilled need reminder
+	// need_id has a UNIQUE constraint
+	// And will not be overwritten by subsequent fulfilments
+	addFulfilledNeedReminder: (needId, orgId) => {
+		return db.query(`INSERT INTO fulfilled_need_reminders 
+		(need_id, organization_id, target_date) 
+		VALUES ($1, $2, NOW() + INTERVAL '2 weeks') 
+		ON CONFLICT DO NOTHING`, [needId, orgId])
+	},
 
-	// getExpiredFulfilledNeedReminders: () => {
-	// 	return db.query(`SELECT from fulfilled_need_reminders WHERE target_date < NOW()`)
-	// }
+	// Extends fulfilled_need_reminder target_date, and sets reminder_sent back to false
+	extendNeed: async (needId) => {
+		let client = await db.getClient()
+
+		// Have to check if the fulfilled_need_reminder is actual valid for extension
+		let results = await db.query('SELECT * from fulfilled_need_reminders WHERE reminder_sent = True AND need_id = $1', [needId]) 
+		if (!results.rows[0]) {
+			client.release()
+			throw("Need is not valid for extension")
+		}
+
+		await db.query(`UPDATE fulfilled_need_reminders SET reminder_sent = False, target_date = NOW() + Interval '1 minute'`)
+		client.release()
+	},
 
 }
 
@@ -400,9 +430,12 @@ module.exports = {
 	);
 
 	// TODO: Change reminder interval. Maybe expose as environment variable? 
+	// TODO: PUT EXPIRY DATE IN MANUALLY
 	CREATE TABLE fulfilled_need_reminders (
-		need_id UUID REFERENCES needs(id) ON DELETE CASCADE NOT NULL,
-		target_date TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '2 hours'
+		need_id UUID REFERENCES needs(id) ON DELETE CASCADE NOT NULL UNIQUE,
+		organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE NOT NULL,
+		target_date TIMESTAMPTZ NOT NULL,
+		reminder_sent BOOLEAN DEFAULT false
 	)
 
 */

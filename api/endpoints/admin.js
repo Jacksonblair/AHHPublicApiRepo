@@ -13,16 +13,24 @@ const email = require('./util/email.js')
 const mw = require('./util/middleware')
 
 
-router.post('/get-hash', async (req, res) => {
+router.get('/get-hash', async (req, res) => {
 	console.log(req.body)
 	let hash = await bcrypt.hash(req.body.password, saltRounds)
 	res.json(hash)
 })
 
+// Admin route for getting all needs
 router.get('/needs', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
-	res.send("got all needs")
+	try {
+		let result = await queries.adminGetAllNeeds()
+		res.status(200).send({ message: MESSAGES.SUCCESS.GOT_NEEDS, needs: result.rows })
+	} catch(err) {
+		console.log(err)
+		res.status(400).send({ message: MESSAGES.ERROR.CANT_GET_NEEDS })
+	}
 })
 
+// Admin route for getting all organizations
 router.get('/org', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
 	try {
 		let result = await queries.adminGetAllOrganizations()

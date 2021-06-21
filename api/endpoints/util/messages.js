@@ -22,6 +22,7 @@ const MESSAGES = {
 		GOT_NEEDS: "Got needs",
 		UPDATED_NEED: "Successfully updated need",
 		DELETED_NEED: "Successfully deleted need",
+		EXTENDED_NEED: "Successfully extended need",
 		SENT_FULFIL_NEED_NOTIFICATION: "Successfully sent fulfil need notification",
 
 		/* Facebook */
@@ -55,9 +56,12 @@ const MESSAGES = {
 		CANT_GET_NEEDS: "Could not get needs",
 		CANT_UPDATE_NEED: "Could not update need",
 		CANT_DELETE_NEED: "Could not delete need",
+		CANT_EXTEND_NEED: "Could not extend need",
 		INVALID_NEED: "Need details are invalid",
 		INVALID_REGION: "Region is invalid",
 		INVALID_FULFILMENT_DETAILS: "Fulfilment details are invalid", 
+		CANNOT_FULFIL_OWN_NEED: "Organizations cannot fulfil their own needs",
+		ADMIN_CANNOT_FULFIL_NEED: "Admin cannot fulfil need",
 
 
 		/* Auth */

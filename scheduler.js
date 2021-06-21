@@ -5,36 +5,53 @@
 // ]
 let queries = require('./api/db/queries.js')
 let email = require('./api/endpoints/util/email')
+let db = require('./api/db')
 
 module.exports = {
 
 	start: async () => {
 		setInterval(async () => {
-			/*
-				Fulfilled_need_reminders
+			console.log("Reminders starting...")
 
-				When a need is fulfilled, we add a reminder of type fulfilled_need to the db
-				with a target date of 2 weeks away
+			let result
+			let client
 
-				When that 2 weeks passes, we send a reminder to the agency asking them to delete the need if its no longer active
-				And then we flag the need as 'inactive', which will make it show up on the admin cp as 'inactive'.
+			try {
+				client = await db.getClient()
+				result = await client.query(`
+				SELECT fulfilled_need_reminders.*, organizations.email, needs.name
+				FROM fulfilled_need_reminders 
+				JOIN organizations 
+				ON fulfilled_need_reminders.organization_id = organizations.id
+				JOIN needs
+				ON fulfilled_need_reminders.need_id = needs.id
+				WHERE target_date < NOW() AND reminder_sent != True`)
+			} catch(err) {
+				client.release()
+				console.log(err)
+				return
+			}
 
-				Then the administrator has to decide manually what to do with it.
-			*/
+			result.rows.forEach(async (reminder) => {
+				// Send reminder e-mail for each expired fulfilment 
+				// NOTE: We dont have to check if the need exists..
+				// .. the reminders will cascade delete if the referenced need is deleted.
 
-			// let result = await queries.getExpiredFulfilledNeedReminders()
-			// result.rows.forEach((reminder) => {
-			// 	// Send reminder e-mail for each expired fulfilment 
-			// 	// NOTE: We dont have to check if the need exists..
-			// 	// .. the reminders will cascade delete if the referenced need is deleted.
-			// 	email.
+				try {
+					await email.sendFulfilledNeedReminder(reminder.email, reminder)
+					// Need to mark reminder.reminder_sent as True (so we don't send it again on the next reminder interval)
+					await client.query(`UPDATE fulfilled_need_reminders SET reminder_sent = True WHERE need_id = $1`, [reminder.need_id])
+					console.log(`Sent reminder about need id: ${reminder.need_id} to: ${reminder.email}`)
+				} catch(err) {
+					client.release()
+				}
 
-			// 	// Delete all expired reminders after this, so we don't use them again.
+			})
+
+			client.release()
 
 
-			// })
-
-		}, 1000 * 60 * 5)
+		}, 1000 * 60 * 60)
 	}
 
 }

@@ -174,6 +174,8 @@ router.post('/org/add', async (req, res) => {
 	// When an org is added
 	// We send a email notification to elise/admin
 	// We dont start a session until they log in 
+	// Also
+	// Make sure organizations cannot be registered with an admin e-mail
 
 	try {
 		// Make sure email used to register is unique
