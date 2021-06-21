@@ -130,17 +130,19 @@ router.get('/:orgid/needs/:needid', async (req, res) => {
 	console.log("HOST: ")
 	console.log(req.get('host'))
 
-	
+
 	try {
 		let result = await queries.getNeed(req.params.needid)
 		
+		res.send({ needs: [] })
+
 		// Alternate response for any other website aside from our client
 		// Basically just to send correct Meta tags to facebook for sharing needs
-		if (req.get('host') == ("ahelpinghandclient.herokuapp.com") || req.get('host') == 'localhost:3001') {
+/*		if (req.get('host') == ("ahelpinghandclient.herokuapp.com") || req.get('host') == 'localhost:3001') {
 			res.status(200).send({ message: MESSAGES.SUCCESS.GOT_NEED, need: result.rows[0] })
 		} else {
 			res.send(getNeedMetaTags(`https://ahelpinghandclient.herokuapp.com/org/${req.params.orgid}/needs/${req.params.needid}`, result.rows[0]))
-		}
+		}*/
 	} catch(err) {
 		handleErr(err)
 		res.status(400).send({ message: MESSAGES.ERROR.CANT_GET_NEED })
