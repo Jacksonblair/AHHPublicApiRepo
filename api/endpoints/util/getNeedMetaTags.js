@@ -4,7 +4,8 @@ module.exports = (url, need) => {
 
 	return `<html>
 		<head>
-		    <meta property="og:markup_url"         content="${url}" />
+		    <meta property="og:url"                content="${url}" />
+		    <meta property="ia:markup_url"         content="${url}" />
 		    <meta property="og:type"               content="article" />
 		    <meta property="og:title"              content="A Helping Hand: ${need.name}" />
 		    <meta property="og:description"        content="Fulfil this need: \"${need.details}\" " />
