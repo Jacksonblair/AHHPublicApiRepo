@@ -133,7 +133,7 @@ router.get('/:orgid/needs/:needid', async (req, res) => {
 		
 		// Alternate response for any other website aside from our client
 		// Basically just to send correct Meta tags to facebook for sharing needs
-		if (req.get('host').includes("ahelpinghand") || req.get('host').includes('localhost')) {
+		if (req.get('host').includes("https://ahelpinghand") || req.get('host').includes('localhost')) {
 			res.status(200).send({ message: MESSAGES.SUCCESS.GOT_NEED, need: result.rows[0] })
 		} else {
 			res.send(needMetaTags)
