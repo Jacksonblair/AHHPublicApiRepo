@@ -8,7 +8,7 @@ const handleErr = require('./util/errors.js')
 const mw = require('./util/middleware')
 const validation = require('./util/validation')
 const email = require('./util/email')
-const needMetaTags = require('./util/needMetaTags.js')
+const getNeedMetaTags = require('./util/getNeedMetaTags.js')
 
 /* Get org profile details */
 router.get('/:orgid/profile', async (req, res) => {
@@ -136,7 +136,7 @@ router.get('/:orgid/needs/:needid', async (req, res) => {
 		if (req.get('host') == ("https://ahelpinghandclient.herokuapp.com") || req.get('host') == 'localhost:3001') {
 			res.status(200).send({ message: MESSAGES.SUCCESS.GOT_NEED, need: result.rows[0] })
 		} else {
-			res.send(needMetaTags)
+			res.send(getNeedMetaTags(`https://ahelpinghandclient.herokuapp.com/org/${req.params.orgid}/needs/${req.params.needid}`), result.rows[0])
 		}
 	} catch(err) {
 		handleErr(err)
