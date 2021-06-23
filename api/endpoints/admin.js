@@ -43,11 +43,9 @@ router.get('/org', Session.verifySession(), mw.verifyAdmin, async (req, res) => 
 
 /* Toggle 'major' flag on need */
 router.put('/needs/:needid/toggle-major', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
-
 	try {
 		await queries.toggleNeedMajor(req.params.needid)
-		let updatedNeeds = await queries.getCurrentNeeds()
-		res.status(200).send({ message: MESSAGES.SUCCESS.TOGGLED_NEED_MAJOR, needs: updatedNeeds.rows })
+		res.status(200).send({ message: MESSAGES.SUCCESS.TOGGLED_NEED_MAJOR })
 	} catch(err) {
 		handleErr(err)
 		res.status(400).send({ message: MESSAGES.ERROR.CANT_UPDATE_NEED })

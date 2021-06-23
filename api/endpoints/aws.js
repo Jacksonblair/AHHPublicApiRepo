@@ -45,4 +45,27 @@ router.get('/signed-policy/:orgid', Session.verifySession(), mw.verifyOrgOwner, 
 
 })
 
-module.exports = router;
+let deleteImage = async (url) => {
+	console.log("Deleting old image url")
+
+	// Parse uuid out of url.
+	let uuid = url.substr(url.length - 36, url.length)
+
+	var params = {
+		Bucket: "ahelpinghandimagebucket", 
+		Key: uuid
+	}
+
+	try {
+		let result = await s3.deleteObject(params).promise()
+		console.log(result)
+	} catch(err) {
+		handleErr(err)
+		console.log(err)
+	}
+}
+
+module.exports = {
+	awsEndpoints: router,
+	deleteImage
+}

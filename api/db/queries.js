@@ -52,12 +52,10 @@ module.exports = {
 		return db.query(`
 		SELECT needs.*,
 		(NOW() - target_date) AS time_expired
-		FROM needs JOIN fulfilled_need_reminders 
-		ON needs.id = fulfilled_need_reminders.need_id
-		`)
+		FROM needs LEFT OUTER JOIN fulfilled_need_reminders 
+		ON needs.id = fulfilled_need_reminders.need_id 
+		ORDER BY needs.created_at`)
 	},
-
-
 
 	/* Org queries */
 
@@ -179,31 +177,53 @@ module.exports = {
 			region,
 			category,
 			details,
-			requirements
-			) VALUES ($1, $2, $3, $4, $5, $6) 
+			requirements,
+			need_image_url
+			) VALUES ($1, $2, $3, $4, $5, $6, $7) 
 			RETURNING id`,
 			[ id,
 			need.name,
 			need.region,
 			need.category,
 			need.details,
-			need.requirements])
+			need.requirements,
+			need.uuid ? `https://s3.ap-southeast-2.amazonaws.com/ahelpinghandimagebucket/${need.uuid}` : 'NULL'])
 	},
 
 	updateNeed: (id, need) => {
-		return db.query(`UPDATE needs SET 
-			name = $2,
-			details = $3,
-			requirements = $4,
-			region = $5 ,
-			category = $6
-			WHERE id = $1`, 
-			[id, 
-			need.name, 
-			need.details,
-			need.requirements,
-			need.region,
-			need.category])
+		console.log(need)
+
+		if (need.need_image_url) {
+			return db.query(`UPDATE needs SET 
+				name = $2,
+				details = $3,
+				requirements = $4,
+				region = $5,
+				category = $6,
+				need_image_url = $7
+				WHERE id = $1`, 
+				[id, 
+				need.name, 
+				need.details,
+				need.requirements,
+				need.region,
+				need.category,
+				need.need_image_url])
+		} else {
+			return db.query(`UPDATE needs SET 
+				name = $2,
+				details = $3,
+				requirements = $4,
+				region = $5,
+				category = $6
+				WHERE id = $1`, 
+				[id, 
+				need.name, 
+				need.details,
+				need.requirements,
+				need.region,
+				need.category])
+		}
 	},
 
 	deleteNeed: (id) => {
@@ -426,11 +446,10 @@ module.exports = {
 		name VARCHAR(300) NOT NULL,
 		details TEXT NOT NULL,
 		requirements TEXT,
-		created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+		created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+		need_image_url VARCHAR(200)
 	);
 
-	// TODO: Change reminder interval. Maybe expose as environment variable? 
-	// TODO: PUT EXPIRY DATE IN MANUALLY
 	CREATE TABLE fulfilled_need_reminders (
 		need_id UUID REFERENCES needs(id) ON DELETE CASCADE NOT NULL UNIQUE,
 		organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE NOT NULL,

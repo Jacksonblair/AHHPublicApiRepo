@@ -9,6 +9,7 @@ const mw = require('./util/middleware')
 const validation = require('./util/validation')
 const email = require('./util/email')
 const getNeedMetaTags = require('./util/getNeedMetaTags.js')
+const { deleteImage } = require('./aws')
 
 /* Get org profile details */
 router.get('/:orgid/profile', async (req, res) => {
@@ -71,11 +72,15 @@ router.delete('/:orgid', Session.verifySession(), mw.verifyOrgOwner, async (req,
 /* Update org profile image details */
 router.put('/:orgid/image', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
 
-	console.log(req.body)
-
 	try {
-		let result = await queries.updateOrganizationImage(req.session.getUserId(), `https://s3.ap-southeast-2.amazonaws.com/ahelpinghandimagebucket/${req.body.uuid}`)
-		if (result.rowCount == 1) {
+		// Delete old image from amazon
+		let result = await queries.getOrganizationProfileById(req.params.orgid)
+		if (result.rows[0].profile_image_url) {
+			await deleteImage(result.rows[0].profile_image_url)
+		}
+
+		let _result = await queries.updateOrganizationImage(req.session.getUserId(), `https://s3.ap-southeast-2.amazonaws.com/ahelpinghandimagebucket/${req.body.uuid}`)
+		if (_result.rowCount == 1) {
 			res.status(200).send({ message: MESSAGES.SUCCESS.UPDATED_ORG_PROFILE})
 		} else {
 			res.status(400).send({ message: MESSAGES.ERROR.CANT_UPDATE_ORG_PROFILE})
@@ -84,6 +89,7 @@ router.put('/:orgid/image', Session.verifySession(), mw.verifyOrgOwner, async (r
 		handleErr(err)
 		res.status(400).send({ message: MESSAGES.ERROR.CANT_UPDATE_ORG_PROFILE})
 	}
+
 })
 
 /* Update org 'about' details */
@@ -135,7 +141,7 @@ router.get('/:orgid/needs/:needid', async (req, res) => {
 
 		// Alternate response for any other website aside from our client
 		// Basically just to send correct Meta tags to facebook for sharing needs
-		if (req.headers.referer== "https://ahelpinghandclient.herokuapp.com/" || req.get('host') == 'http://localhost:3000') {
+		if (req.headers.referer == "https://ahelpinghandclient.herokuapp.com/" || req.headers.referer == 'http://localhost:3000/') {
 			res.status(200).send({ message: MESSAGES.SUCCESS.GOT_NEED, need: result.rows[0] })
 		} else {
 			res.send(getNeedMetaTags(`https://ahelpinghandclient.herokuapp.com/org/${req.params.orgid}/needs/${req.params.needid}`, result.rows[0]))
@@ -177,14 +183,25 @@ router.put('/:orgid/needs/:needid', Session.verifySession(), mw.verifyOrgOwner, 
 		return
 	}
 
+	// TODO: Delete old image from amazon
+
 	try {
-		let result = await queries.updateNeed(req.params.needid, req.body)
+		// Get old need first to check if we need to delete an existing image from S3
+		console.log("Checking for old image url")
+		let result = await queries.getNeed(req.params.needid)
+		if (result.rows[0].need_image_url) {
+			await deleteImage(result.rows[0].need_image_url)
+		}
+
+		await queries.updateNeed(req.params.needid, req.body)
 		res.status(200).send({ message: MESSAGES.SUCCESS.UPDATED_NEED })
 	} catch(err) {
 		handleErr(err)
 		res.status(400).send({ message: MESSAGES.ERROR.CANT_UPDATE_NEED })
 	}
+
 })
+
 
 /* Extend a need */
 router.get('/:orgid/needs/:needid/extend', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {

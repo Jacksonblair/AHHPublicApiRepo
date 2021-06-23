@@ -60,7 +60,7 @@ const authEndpoints = require('./api/endpoints/auth.js')
 const organizationEndpoints = require('./api/endpoints/organization.js')
 const currentNeedsEndpoints = require('./api/endpoints/currentNeeds.js')
 const facebookEndpoints = require('./api/endpoints/facebook.js')
-const awsEndpoints = require('./api/endpoints/aws.js')
+const { awsEndpoints } = require('./api/endpoints/aws.js')
 const adminEndpoints = require('./api/endpoints/admin.js')
 
 app.use('/auth', authEndpoints)
