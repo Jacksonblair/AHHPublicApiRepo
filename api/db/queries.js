@@ -57,11 +57,41 @@ module.exports = {
 		ORDER BY needs.created_at`)
 	},
 
+	adminAddImpact: (details) => {
+		return db.query(`INSERT INTO impacts 
+			(title, content, impact_image_urls) 
+			VALUES ($1, $2, $3)`, [details.title, details.content, details.urls])
+	},
+
+	adminGetImpacts: () => {
+		return db.query(`SELECT * from impacts ORDER BY created_at`)
+	},
+ 
+	adminGetImpactById: (impactId) => {
+		return db.query(`SELECT * FROM impacts WHERE id = $1`, [impactId])
+	},
+
+	adminDeleteImpact: (impactId) => {
+		return db.query(`DELETE FROM impacts WHERE id = $1`, [impactId])
+	},
+
+	adminUpdateImpact: (impactId, details) => {
+		return db.query(`UPDATE impacts SET 
+		title = $2,
+		content = $3,
+		impact_image_urls = $4
+		WHERE id = $1`, [impactId, details.title, details.content, details.urls])
+	},	
+
+
+
+
 	/* Org queries */
 
 	getOrganizationProfileById: (id) => {
 		return db.query(`SELECT 
 		id,
+		email,
 		contact_name,
 		contact_number,
 		organization_name,
@@ -187,7 +217,7 @@ module.exports = {
 			need.category,
 			need.details,
 			need.requirements,
-			need.uuid ? `https://s3.ap-southeast-2.amazonaws.com/ahelpinghandimagebucket/${need.uuid}` : 'NULL'])
+			need.uuid ? `https://s3.ap-southeast-2.amazonaws.com/ahelpinghandimagebucket/${need.uuid}` : ''])
 	},
 
 	updateNeed: (id, need) => {
@@ -233,7 +263,7 @@ module.exports = {
 	getNeed: (id) => {
 		return db.query(`SELECT 
 			needs.*,
-			organizations.organization_name
+			organizations.organization_name, organizations.profile_image_url
 			FROM needs 
 			JOIN organizations ON needs.organization_id = organizations.id
 			WHERE needs.id = $1`, [id])
@@ -242,7 +272,7 @@ module.exports = {
 	getNeedsByOrgId: (id) => {
 		return db.query(`SELECT 
 			needs.*,
-			organizations.organization_name
+			organizations.organization_name, organizations.profile_image_url
 			FROM needs 
 			JOIN organizations ON needs.organization_id = organizations.id
 			WHERE organizations.id = $1`, [id])
@@ -382,6 +412,10 @@ module.exports = {
 		client.release()
 	},
 
+	getImpacts: async () => {
+		return db.query('SELECT * FROM impacts ORDER BY created_at')
+	}
+
 }
 
 
@@ -395,6 +429,14 @@ module.exports = {
 			SELECT uuid_generate_v1();
 
 	TABLES:
+	
+	CREATE TABLE impacts (
+		id UUID DEFAULT uuid_generate_v1() PRIMARY KEY,
+		title VARCHAR(200),
+		content TEXT,
+		impact_image_urls TEXT,
+		created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
 
 	CREATE TABLE organizations (
 		id UUID DEFAULT uuid_generate_v1() PRIMARY KEY,
@@ -447,7 +489,7 @@ module.exports = {
 		details TEXT NOT NULL,
 		requirements TEXT,
 		created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-		need_image_url VARCHAR(200)
+		need_image_url VARCHAR(200) DEFAULT NULL
 	);
 
 	CREATE TABLE fulfilled_need_reminders (

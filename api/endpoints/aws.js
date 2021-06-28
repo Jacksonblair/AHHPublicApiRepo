@@ -23,6 +23,9 @@ const minFileSize = 1024 // About .1 mb
 
 router.get('/signed-policy/:orgid', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
 
+	// TODO: Not using the orgid for anything. Remove it? 
+	// TODO: Standardize the response messages
+
 	let key = uuidv4()
 	try {
 		let signed = await s3.createPresignedPost({
@@ -36,8 +39,37 @@ router.get('/signed-policy/:orgid', Session.verifySession(), mw.verifyOrgOwner, 
 			Expires: 3000,
 			Bucket: process.env.AWS_BUCKET_NAME
 		})
-		console.log(signed)
 		res.status(200).send({ message: "Succesfully generated signed policy", signed })
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send({ message: "Could not generate signed policy" })
+	}
+
+})
+
+router.get('/signed-policies/:number', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
+
+	let number = parseInt(req.params.number)
+	let keys = new Array(number).fill(0).map(() => uuidv4() )
+	let policies = []
+
+	try {
+		if (!keys.length) throw("Invalid number of policies requested")
+		for (let i = 0; i < keys.length; i++) {
+			let policy = await s3.createPresignedPost({
+				Fields: {
+					key: keys[i]
+				},
+				Conditions: [
+					[ "starts-with", "$Content-Type", "image/" ],
+					[ "content-length-range", minFileSize, maxFileSize]
+				],
+				Expires: 3000,
+				Bucket: process.env.AWS_BUCKET_NAME
+			})
+			policies.push(policy)
+		}
+		res.status(200).send({ message: "Succesfully generated signed policies", policies })
 	} catch(err) {
 		handleErr(err)
 		res.status(400).send({ message: "Could not generate signed policy" })

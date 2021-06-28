@@ -82,8 +82,8 @@ router.post('/org/:orgid/change-email', Session.verifySession(), mw.verifyOrgOwn
 
 })
 
-
-router.get('/org/:orgid/reset-password', Session.verifySession(), mw.verifyOrgOwner, async (req, res) =>{
+/* Route for users who forgot their password */
+router.post('/reset-password', async (req, res) =>{
 
 	/*
  		When user wants to reset their password (if they forgot)..
@@ -91,11 +91,17 @@ router.get('/org/:orgid/reset-password', Session.verifySession(), mw.verifyOrgOw
  		Which contains a uuid which they can use to verify a password change
 	*/
 
-	let userId = req.session.getUserId()
+	console.log(req.body)
+
 	let uuid = uuidv4()
 
 	try {
-		await queries.insertPasswordReset(uuid, req.params.orgid)
+		// Check that the specified e-mail address actually exists
+		let result = await queries.getOrganizationByEmail(req.body.email)
+		if (!result.rows[0]) throw(MESSAGES.ERROR.COULD_NOT_RESET_ORG_PASSWORD)
+		console.log(result)
+
+		await queries.insertPasswordReset(uuid, result.rows[0].id)
 		await email.sendPasswordResetCode(uuid)
 		res.status(200).send({ message: MESSAGES.SUCCESS.SENT_PASSWORD_RESET})
 	} catch(err) {
@@ -105,7 +111,7 @@ router.get('/org/:orgid/reset-password', Session.verifySession(), mw.verifyOrgOw
 
 })
 
-
+/* Completing forgot password process */
 router.post('/complete-reset-password/:uuid', Session.verifySession({sessionRequired: false}), async (req, res) => {
 
 	// Try to find uuid in 'passwordResets' table 

@@ -5,6 +5,7 @@ const Session = require("supertokens-node/recipe/session");
 const validation = require('./util/validation')
 const bcrypt = require('bcrypt')
 const saltRounds = 10
+const { deleteImage } = require('./aws')
 
 const MESSAGES = require('./util/messages.js')
 const handleErr = require('./util/errors.js')
@@ -51,6 +52,93 @@ router.put('/needs/:needid/toggle-major', Session.verifySession(), mw.verifyAdmi
 		res.status(400).send({ message: MESSAGES.ERROR.CANT_UPDATE_NEED })
 	}
 
+})
+
+/* Admin get impacts */
+router.get('/impacts', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
+	try {
+		let result = await queries.adminGetImpacts()
+		res.status(200).send({ message: MESSAGES.SUCCESS.GOT_IMPACTS, impacts: result.rows })
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send({ message: MESSAGES.ERROR.CANT_GET_IMPACTS })	
+	}
+})
+
+/* Admin delete impact */
+router.delete('/impacts/:impactid', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
+	try {
+		let result = await queries.adminDeleteImpact(req.params.impactid)
+		res.status(200).send({ message: MESSAGES.SUCCESS.DELETED_IMPACT })
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send({ message: MESSAGES.ERROR.CANT_DELETE_IMPACT })	
+	}
+})
+
+/* Admin add impact */
+router.post('/impacts/add', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
+
+	// If there are any uuids in the body, we need to format them a ',' separated string
+	// And store that in the impact_image_urls as text
+	let uuids = req.body.uuids.map((uuid) => {
+		return `https://s3.ap-southeast-2.amazonaws.com/ahelpinghandimagebucket/${uuid}`
+	})
+	req.body.urls = uuids.join(',')
+
+	try {
+		let result = await queries.adminAddImpact(req.body)
+		res.status(200).send({ message: MESSAGES.SUCCESS.ADDED_IMPACT })
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send({ message: MESSAGES.ERROR.CANT_ADD_IMPACT })	
+	}
+})
+
+/* Admin update impact */
+router.put('/impacts/:impactid', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
+
+	// We get a list of new uuids to store with the impact
+	// And a list of previous image urls to delete (if any)
+	try {
+
+		// Get urls we want to delete
+		let result = await queries.adminGetImpactById(req.params.impactid)
+		let previousImageUrls = result.rows[0].impact_image_urls.split(',')
+		let updatedUrls = previousImageUrls.filter((url) => {
+			return !req.body.delete.includes(url)
+		})
+
+		// Extract uuid from url and send request to amazon to delete each one
+		req.body.delete.map(async (url) => {
+			await deleteImage(url.substr(64, url.length))
+		})
+
+		// Format new image urls
+		let newUrls = req.body.uuids.map((uuid) => {
+			return `https://s3.ap-southeast-2.amazonaws.com/ahelpinghandimagebucket/${uuid}`
+		})
+
+		// Join existing and new together and update row	
+		req.body.urls = [...updatedUrls, ...newUrls].join(',')
+
+		queries.adminUpdateImpact(req.params.impactid, req.body)
+		res.status(200).send({ message: MESSAGES.SUCCESS.UPDATED_IMPACT })
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send({ message: MESSAGES.ERROR.CANT_UPDATE_IMPACT })		
+	}
+})
+
+/* Delete need */
+router.delete('/needs/:needid/', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
+	try {
+		await queries.deleteNeed(req.params.needid)
+		res.status(200).send({ message: MESSAGES.SUCCESS.DELETED_NEED })
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send({ message: MESSAGES.ERROR.CANT_DELETE_NEED })
+	}
 })
 
 /* Toggle 'approved' flag on organization */

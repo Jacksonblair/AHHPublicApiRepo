@@ -7,6 +7,10 @@ let queries = require('./api/db/queries.js')
 let email = require('./api/endpoints/util/email')
 let db = require('./api/db')
 
+
+// TODO: Add task for cleaning up unused images in s3? 
+
+
 module.exports = {
 
 	start: async () => {

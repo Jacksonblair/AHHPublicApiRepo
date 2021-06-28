@@ -142,6 +142,10 @@ router.get('/:orgid/needs/:needid', async (req, res) => {
 		// Alternate response for any other website aside from our client
 		// Basically just to send correct Meta tags to facebook for sharing needs
 		if (req.headers.referer == "https://ahelpinghandclient.herokuapp.com/" || req.headers.referer == 'http://localhost:3000/') {
+			
+			// TODO: If result.rows[0].need_image_url is not truthy
+			// Overwrite it with a link to a default need sharing image url
+
 			res.status(200).send({ message: MESSAGES.SUCCESS.GOT_NEED, need: result.rows[0] })
 		} else {
 			res.send(getNeedMetaTags(`https://ahelpinghandclient.herokuapp.com/org/${req.params.orgid}/needs/${req.params.needid}`, result.rows[0]))
@@ -154,6 +158,9 @@ router.get('/:orgid/needs/:needid', async (req, res) => {
 
 /* Delete need */
 router.delete('/:orgid/needs/:needid', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
+	
+	// TODO: Delete image if there is one associated with need
+
 	try {
 		let result = await queries.deleteNeed(req.params.needid)
 		res.status(200).send({ message: MESSAGES.SUCCESS.DELETED_NEED })

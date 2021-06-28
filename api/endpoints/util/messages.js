@@ -32,6 +32,10 @@ const MESSAGES = {
 		TOGGLED_NEED_MAJOR: "Successfully toggled need 'major' flag",
 		GOT_ALL_ORGS: "Successfully got all organizations",
 		TOGGLED_ORG_APPROVAL: "Successfully toggled organization 'approval' flag",
+		GOT_IMPACTS: "Successfully got impacts",
+		DELETED_IMPACT: "Successfully deleted impact",
+		ADDED_IMPACT: "Successfully added impact",
+		UPDATED_IMPACT: "Successfully updated impact"
 
 	},
 	ERROR: {
@@ -85,6 +89,10 @@ const MESSAGES = {
 		/* Admin */
 		COULD_NOT_GET_ALL_ORGS: "Could not get all organizations",
 		CANT_TOGGLE_ORG_APPROVAL: "Could not toggle organization 'approval' field",
+		CANT_GET_IMPACTS: "Could not get impacts",
+		CANT_DELETE_IMPACT: "Could not delete impact",
+		CANT_ADD_IMPACT: "Could not add impact",
+		CANT_UPDATE_IMPACT: "Could not update impact"
 
 	}
 }

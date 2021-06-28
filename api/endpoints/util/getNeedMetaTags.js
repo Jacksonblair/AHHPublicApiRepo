@@ -1,10 +1,9 @@
 module.exports = (url, need) => {
-	console.log(url)
-	console.log(need)
+	if (need == undefined) throw("Need does not exist")
 
 	return `<html>
 		<head>
-		    <meta property="og:url"                content="prrrrrttt.com"/>
+		    <meta property="og:url"                content="doesntmatter.com"/>
 		    <meta property="og:type"               content="website" />
 		    <meta property="og:title"              content="A Helping Hand: ${need.name}" />
 		    <meta property="og:description"        content="Fulfil this need: ${need.details} " />
