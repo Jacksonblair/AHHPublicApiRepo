@@ -165,15 +165,10 @@ router.post('/supporters/add', Session.verifySession(), mw.verifyAdmin, async (r
 router.post('/supporters/delete', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
 	try {
 		let result = await queries.getSupporters()
-		let supporters
 
-		if (result.rows[0]) {
-			supporters = result.rows[0].list.split(',').filter((e) => e)
-			supporters.splice(supporters.indexOf(req.body.supporter), 1)
-		} else {
-			res.status(400).send({ message: 'Could not removed supporter' })			
-			return
-		}
+		// Filter out empty indices OR the specified supporter we want to remove
+		let supporters = result.rows[0].list.split(',').filter((e) => e)
+		supporters.splice(supporters.indexOf(req.body.supporter), 1)
 
 		await queries.adminUpdateSupporters(supporters.join(','))		
 		res.status(200).send({ message: 'Succesfully removed supporter' })			
