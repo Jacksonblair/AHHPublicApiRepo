@@ -145,14 +145,11 @@ router.put('/impacts/:impactid', Session.verifySession(), mw.verifyAdmin, async 
 router.post('/supporters/add', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
 	try {
 		let result = await queries.getSupporters()
+		
+		// Filter out any empty elements when we update
+		let supporters = result.rows[0].list.split(',').filter((e) => e)
 
-		let supporters
-		if (result.rows[0]) {
-			supporters = result.rows[0].list.split(',').filter((e) => e)
-			supporters.push(req.body.supporter)
-		} else {
-			supporters = [req.body.supporter]
-		}
+		supporters.push(req.body.supporter)
 		await queries.adminUpdateSupporters(supporters.join(','))		
 		res.status(200).send({ message: 'Succesfully added supporter' })			
 	} catch(err) {
