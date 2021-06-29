@@ -21,6 +21,10 @@ module.exports = {
 		return db.query('UPDATE needs SET major = NOT major WHERE id = $1', [id])
 	},
 
+	toggleNeedApproved: (id) => {
+		return db.query('UPDATE needs SET approved = NOT approved WHERE id = $1', [id])
+	},
+
 	getAdminByEmail: (email) => {
 		return db.query(`SELECT * FROM admins WHERE email = $1`, [email])
 	},
@@ -80,11 +84,12 @@ module.exports = {
 		title = $2,
 		content = $3,
 		impact_image_urls = $4
-		WHERE id = $1`, [impactId, details.title, details.content, details.urls])
+		WHERE id = $1 RETURNING *`, [impactId, details.title, details.content, details.urls])
 	},	
 
-
-
+	adminUpdateSupporters: (supporters) => {
+		return db.query(`UPDATE supporters SET list = $1`, [supporters])
+	},
 
 	/* Org queries */
 
@@ -260,10 +265,19 @@ module.exports = {
 		return db.query(`DELETE FROM needs WHERE id = $1`, [id])
 	},
 
+	setNeedFulfilled: (id) => {
+		return db.query(`UPDATE needs SET 
+			fulfilled = True, 
+			fulfilled_at = NOW() 
+			WHERE id = $1`, [id])
+	},
+
 	getNeed: (id) => {
 		return db.query(`SELECT 
 			needs.*,
-			organizations.organization_name, organizations.profile_image_url
+			organizations.organization_name, 
+			organizations.profile_image_url,
+			organizations.contact_name
 			FROM needs 
 			JOIN organizations ON needs.organization_id = organizations.id
 			WHERE needs.id = $1`, [id])
@@ -284,7 +298,7 @@ module.exports = {
 			organizations.organization_name
 			FROM needs 
 			JOIN organizations ON needs.organization_id = organizations.id
-			WHERE needs.region = $1 
+			WHERE needs.region = $1 AND needs.fulfilled != True AND needs.approved = True
 			ORDER BY needs.major DESC`, [region])
 	},
 
@@ -294,8 +308,11 @@ module.exports = {
 			organizations.organization_name
 			FROM needs 
 			JOIN organizations ON needs.organization_id = organizations.id
+			WHERE need.fulfilled != true
 			ORDER BY needs.major DESC`)
 	},
+
+
 
 
 	/* Password and email reset */
@@ -412,8 +429,15 @@ module.exports = {
 		client.release()
 	},
 
+
+	/* Misc */
+
 	getImpacts: async () => {
 		return db.query('SELECT * FROM impacts ORDER BY created_at')
+	},
+
+	getSupporters: async () => {
+		return db.query('SELECT * FROM supporters')
 	}
 
 }
@@ -430,6 +454,10 @@ module.exports = {
 
 	TABLES:
 	
+	CREATE TABLE supporters (
+		list TEXT
+	)
+
 	CREATE TABLE impacts (
 		id UUID DEFAULT uuid_generate_v1() PRIMARY KEY,
 		title VARCHAR(200),
@@ -489,7 +517,10 @@ module.exports = {
 		details TEXT NOT NULL,
 		requirements TEXT,
 		created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-		need_image_url VARCHAR(200) DEFAULT NULL
+		need_image_url VARCHAR(200) DEFAULT NULL,
+		fulfilled BOOL NOT NULL DEFAULT false,
+		fulfilled_date TIMESTAMPTZ,
+		approved BOOL NOT NULL DEFAULT false
 	);
 
 	CREATE TABLE fulfilled_need_reminders (

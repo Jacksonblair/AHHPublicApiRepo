@@ -182,7 +182,17 @@ router.get('/:orgid/needs/', async (req, res) => {
 })
 
 /* Update a need */
-router.put('/:orgid/needs/:needid', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
+router.put('/:orgid/needs/:needid', Session.verifySession(), async (req, res) => {
+
+	// Doing these checks outside middleware because either Admin or org owner can edit this need	
+	let jwtPayload = req.session.getJWTPayload()
+	let userId = req.session.getUserId()
+	if (userId != req.params.orgid) {
+		if (jwtPayload.role != "admin") {
+			res.status(400).send({ message: MESSAGES.ERROR.NOT_ORG_OWNER })
+			return
+		}
+	}
 
 	// Validate new need details
 	if (!validation.validateNeed(req.body)) {
@@ -221,7 +231,23 @@ router.get('/:orgid/needs/:needid/extend', Session.verifySession(), mw.verifyOrg
 	}
 })
 
-/* Fulfil a need*/
+
+/* Set need fulfilled (agency) */
+router.get('/:orgid/needs/:needid/set-fulfilled', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
+
+	// TODO: Send email to elise when need set as fulfilled? 
+
+	try {
+		let result = await queries.setNeedFulfilled(req.params.needid)
+		res.status(200).send({ message: MESSAGES.SUCCESS.SET_NEED_FULFILLED })
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send({ message: MESSAGES.ERROR.CANT_SET_NEED_FULFILLED })	
+	}
+
+})
+
+/* Fulfil a need (public) */
 router.post('/:orgid/needs/:needid/fulfil', Session.verifySession({sessionRequired: false}), async (req, res) => {
 
 	// res.status(400).send({ message: "Sorry still working on this!"})
@@ -242,9 +268,11 @@ router.post('/:orgid/needs/:needid/fulfil', Session.verifySession({sessionRequir
 	}
 
 	// Make sure not an admin fulfilling need
-	if (req.session.getJWTPayload()["role"] == "admin") {
-		res.status(400).send({ message: MESSAGES.ERROR.ADMIN_CANNOT_FULFIL_NEED })
-		return
+	if (req.session) {
+		if (req.session.getJWTPayload()["role"] == "admin") {
+			res.status(400).send({ message: MESSAGES.ERROR.ADMIN_CANNOT_FULFIL_NEED })
+			return
+		}
 	}
 
 	try {

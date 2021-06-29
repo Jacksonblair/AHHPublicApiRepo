@@ -44,8 +44,6 @@ router.get('/confirm-update-email/:uuid', Session.verifySession({sessionRequired
 
 router.post('/org/:orgid/change-email', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
 
-	// TODO: Confirm that the new e-mail is unique
-
 	let currentEmail = req.session.getJWTPayload()["email"]
 	let userId = req.session.getUserId()
 

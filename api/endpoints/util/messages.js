@@ -24,6 +24,7 @@ const MESSAGES = {
 		DELETED_NEED: "Successfully deleted need",
 		EXTENDED_NEED: "Successfully extended need",
 		SENT_FULFIL_NEED_NOTIFICATION: "Successfully sent fulfil need notification",
+		SET_NEED_FULFILLED: "Successfully set need as 'fulfilled'",
 
 		/* Facebook */
 		GOT_FACEBOOK_FEED: "Successfully got Facebook feed",
@@ -32,10 +33,14 @@ const MESSAGES = {
 		TOGGLED_NEED_MAJOR: "Successfully toggled need 'major' flag",
 		GOT_ALL_ORGS: "Successfully got all organizations",
 		TOGGLED_ORG_APPROVAL: "Successfully toggled organization 'approval' flag",
-		GOT_IMPACTS: "Successfully got impacts",
 		DELETED_IMPACT: "Successfully deleted impact",
 		ADDED_IMPACT: "Successfully added impact",
-		UPDATED_IMPACT: "Successfully updated impact"
+		UPDATED_IMPACT: "Successfully updated impact",
+		TOGGLED_NEED_APPROVAL: "Successfully toggled need 'approval' flag",
+
+		/* Misc */
+		GOT_IMPACTS: "Successfully got impacts",
+		GOT_SUPPORTERS: "Successfully got supporters",
 
 	},
 	ERROR: {
@@ -66,6 +71,7 @@ const MESSAGES = {
 		INVALID_FULFILMENT_DETAILS: "Fulfilment details are invalid", 
 		CANNOT_FULFIL_OWN_NEED: "Organizations cannot fulfil their own needs",
 		ADMIN_CANNOT_FULFIL_NEED: "Admin cannot fulfil need",
+		CANT_SET_NEED_FULFILLED: "Could not set need as 'fulfilled'",
 
 
 		/* Auth */
@@ -88,11 +94,16 @@ const MESSAGES = {
 
 		/* Admin */
 		COULD_NOT_GET_ALL_ORGS: "Could not get all organizations",
-		CANT_TOGGLE_ORG_APPROVAL: "Could not toggle organization 'approval' field",
-		CANT_GET_IMPACTS: "Could not get impacts",
+		CANT_TOGGLE_ORG_APPROVAL: "Could not toggle organization 'approval' flag",
 		CANT_DELETE_IMPACT: "Could not delete impact",
 		CANT_ADD_IMPACT: "Could not add impact",
-		CANT_UPDATE_IMPACT: "Could not update impact"
+		CANT_UPDATE_IMPACT: "Could not update impact",
+		CANT_TOGGLE_NEED_APPROVAL: "Could not toggle need 'approval' flag",
+
+		/* MIsc */
+		CANT_GET_IMPACTS: "Could not get impacts",
+		CANT_GET_SUPPORTERS: "Could not get supporters",
+
 
 	}
 }

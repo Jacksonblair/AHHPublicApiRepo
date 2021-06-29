@@ -14,4 +14,14 @@ router.get('/impacts', async (req, res) => {
 	}
 })
 
+router.get('/supporters', async (req, res) => {
+	try {
+		let result = await queries.getSupporters()
+		res.status(200).send({ message: MESSAGES.SUCCESS.GOT_SUPPORTERS, supporters: result.rows })
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send({ message: MESSAGES.ERROR.CANT_GET_SUPPORTERS })
+	}
+})
+
 module.exports = router

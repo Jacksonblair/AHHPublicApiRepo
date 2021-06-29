@@ -54,6 +54,17 @@ router.put('/needs/:needid/toggle-major', Session.verifySession(), mw.verifyAdmi
 
 })
 
+/* Toggle 'approved' flag on need */
+router.put('/needs/:needid/toggle-approved', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
+	try {
+		await queries.toggleNeedApproved(req.params.needid)
+		res.status(200).send({ message: MESSAGES.SUCCESS.TOGGLED_NEED_APPROVAL })
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send({ message: MESSAGES.ERROR.CANT_TOGGLE_NEED_APPROVAL })
+	}
+})
+
 /* Admin get impacts */
 router.get('/impacts', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
 	try {
@@ -122,11 +133,43 @@ router.put('/impacts/:impactid', Session.verifySession(), mw.verifyAdmin, async 
 		// Join existing and new together and update row	
 		req.body.urls = [...updatedUrls, ...newUrls].join(',')
 
-		queries.adminUpdateImpact(req.params.impactid, req.body)
-		res.status(200).send({ message: MESSAGES.SUCCESS.UPDATED_IMPACT })
+		let _result = await queries.adminUpdateImpact(req.params.impactid, req.body)
+		res.status(200).send({ message: MESSAGES.SUCCESS.UPDATED_IMPACT, impact: _result.rows[0] })
 	} catch(err) {
 		handleErr(err)
 		res.status(400).send({ message: MESSAGES.ERROR.CANT_UPDATE_IMPACT })		
+	}
+})
+
+/* Add Supporter */
+router.post('/supporters/add', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
+	try {
+		let result = await queries.getSupporters()
+		let supporters = result.rows[0].list.split(',').filter((e) => e)
+		supporters.push(req.body.supporter)
+		await queries.adminUpdateSupporters(supporters.join(','))		
+		res.status(200).send({ message: 'Succesfully added supporter' })			
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send({ message: 'Could not add supporter' })			
+	}
+})
+
+/* Remove Supporter */
+router.post('/supporters/delete', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
+	try {
+		let result = await queries.getSupporters()
+		console.log(result.rows[0].list)
+
+		// Filter out empty indices OR the specified supporter we want to remove
+		let supporters = result.rows[0].list.split(',').filter((e) => e)
+		supporters.splice(supporters.indexOf(req.body.supporter), 1)
+
+		await queries.adminUpdateSupporters(supporters.join(','))		
+		res.status(200).send({ message: 'Succesfully removed supporter' })			
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send({ message: 'Could not removed supporter' })			
 	}
 })
 
@@ -149,10 +192,9 @@ router.put('/org/:orgid/toggle-approved', Session.verifySession(), mw.verifyAdmi
 		res.status(200).send({ message: MESSAGES.SUCCESS.TOGGLED_ORG_APPROVAL, orgs: updatedOrganizations.rows })
 	} catch(err) {
 		handleErr(err)
-		res.status(400).send({ message: MESSAGES.ERROR.CANT_UPDATE_ORGANIZATION_APPROVAL })
+		res.status(400).send({ message: MESSAGES.ERROR.CANT_TOGGLE_ORG_APPROVAL })
 	}
 })
-
 
 /* Admin logging in*/
 router.post('/login', async(req, res) => {
