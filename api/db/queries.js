@@ -486,7 +486,6 @@ module.exports = {
 		profile_image_url VARCHAR(200)
 	);
 
-
 	CREATE TABLE admins (
 		id UUID DEFAULT uuid_generate_v1() PRIMARY KEY,
 		name VARCHAR(100) NOT NULL,

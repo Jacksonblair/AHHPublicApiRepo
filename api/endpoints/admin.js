@@ -145,8 +145,14 @@ router.put('/impacts/:impactid', Session.verifySession(), mw.verifyAdmin, async 
 router.post('/supporters/add', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
 	try {
 		let result = await queries.getSupporters()
-		let supporters = result.rows[0].list.split(',').filter((e) => e)
-		supporters.push(req.body.supporter)
+
+		let supporters
+		if (result.rows[0]) {
+			supporters = result.rows[0].list.split(',').filter((e) => e)
+			supporters.push(req.body.supporter)
+		} else {
+			supporters = [req.body.supporter]
+		}
 		await queries.adminUpdateSupporters(supporters.join(','))		
 		res.status(200).send({ message: 'Succesfully added supporter' })			
 	} catch(err) {
@@ -159,12 +165,16 @@ router.post('/supporters/add', Session.verifySession(), mw.verifyAdmin, async (r
 router.post('/supporters/delete', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
 	try {
 		let result = await queries.getSupporters()
-		console.log(result.rows[0].list)
 
-		// Filter out empty indices OR the specified supporter we want to remove
-		let supporters = result.rows[0].list.split(',').filter((e) => e)
-		supporters.splice(supporters.indexOf(req.body.supporter), 1)
+		let supporters
 
+		if (result.rows[0]) {
+			let supporters = result.rows[0].list.split(',').filter((e) => e)
+			supporters.splice(supporters.indexOf(req.body.supporter), 1)
+		} else {
+			throw('')
+		}
+		
 		await queries.adminUpdateSupporters(supporters.join(','))		
 		res.status(200).send({ message: 'Succesfully removed supporter' })			
 	} catch(err) {
