@@ -169,12 +169,12 @@ router.post('/supporters/delete', Session.verifySession(), mw.verifyAdmin, async
 		let supporters
 
 		if (result.rows[0]) {
-			let supporters = result.rows[0].list.split(',').filter((e) => e)
+			supporters = result.rows[0].list.split(',').filter((e) => e)
 			supporters.splice(supporters.indexOf(req.body.supporter), 1)
 		} else {
 			throw('')
 		}
-		
+
 		await queries.adminUpdateSupporters(supporters.join(','))		
 		res.status(200).send({ message: 'Succesfully removed supporter' })			
 	} catch(err) {
