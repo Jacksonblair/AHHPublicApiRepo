@@ -161,7 +161,7 @@ module.exports = {
 			city = $7,
 			state = $8,
 			postcode = $9,
-			country = $10
+			country = $10,
 			abn = $11
 			WHERE id = $1`,
 			[ id,
