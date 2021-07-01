@@ -92,7 +92,15 @@ router.get('/impacts', Session.verifySession(), mw.verifyAdmin, async (req, res)
 /* Admin delete impact */
 router.delete('/impacts/:impactid', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
 	try {
-		let result = await queries.adminDeleteImpact(req.params.impactid)
+		// Delete any images associated with the impact
+		let result = await queries.adminGetImpactById(req.params.impactid)
+		let urls = result.rows[0].impact_image_urls.split(',').filter((url) => url)
+
+		urls.forEach(async (url) => {
+			await deleteImage(url)
+		})
+
+		await queries.adminDeleteImpact(req.params.impactid)
 		res.status(200).send({ message: MESSAGES.SUCCESS.DELETED_IMPACT })
 	} catch(err) {
 		handleErr(err)
