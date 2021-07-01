@@ -65,13 +65,11 @@ router.delete('/:orgid', Session.verifySession(), mw.verifyOrgOwner, async (req,
 		res.status(400).send({ message: MESSAGES.ERROR.CANT_DELETE_ORG})
 	}
 
-
 })
 
 
 /* Update org profile image details */
 router.put('/:orgid/image', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
-
 	try {
 		// Delete old image from amazon
 		let result = await queries.getOrganizationProfileById(req.params.orgid)
@@ -89,7 +87,6 @@ router.put('/:orgid/image', Session.verifySession(), mw.verifyOrgOwner, async (r
 		handleErr(err)
 		res.status(400).send({ message: MESSAGES.ERROR.CANT_UPDATE_ORG_PROFILE})
 	}
-
 })
 
 /* Update org 'about' details */
@@ -112,15 +109,12 @@ router.put('/:orgid/about', Session.verifySession(), mw.verifyOrgOwner, async (r
 
 /* Add need */
 router.post('/:orgid/needs/add', Session.verifySession(), mw.verifyOrgOwner, mw.verifyApproved, async (req, res) => {
-	
-	console.log(req.body)
-
 	// Validate need
 	if (!validation.validateNeed(req.body)) {
 		res.status(400).send({ message: MESSAGES.ERROR.INVALID_NEED })
 		return
 	}
-	
+
 	try {
 		let result = await queries.insertNeed(req.session.getUserId(), req.body)
 		res.status(200).send({ message: MESSAGES.SUCCESS.ADDED_NEED, id: result.rows[0].id })
@@ -132,22 +126,16 @@ router.post('/:orgid/needs/add', Session.verifySession(), mw.verifyOrgOwner, mw.
 
 /* Get need */
 router.get('/:orgid/needs/:needid', async (req, res) => {
-
-	console.log(req.headers)
-	console.log(req.headers.referer)
-
 	try {
 		let result = await queries.getNeed(req.params.needid)
 
 		// Alternate response for any other website aside from our client
 		// Basically just to send correct Meta tags to facebook for sharing needs
 		if (req.headers.referer == "https://ahelpinghandclient.herokuapp.com/" || req.headers.referer == 'http://localhost:3000/') {
-			
-			// TODO: If result.rows[0].need_image_url is not truthy
-			// Overwrite it with a link to a default need sharing image url
-
 			res.status(200).send({ message: MESSAGES.SUCCESS.GOT_NEED, need: result.rows[0] })
 		} else {
+			// If result.rows[0].need_image_url is not truthy
+			// Overwrite it with a link to a default need sharing image url
 			res.send(getNeedMetaTags(`https://ahelpinghandclient.herokuapp.com/org/${req.params.orgid}/needs/${req.params.needid}`, result.rows[0]))
 		}
 	} catch(err) {
@@ -158,11 +146,13 @@ router.get('/:orgid/needs/:needid', async (req, res) => {
 
 /* Delete need */
 router.delete('/:orgid/needs/:needid', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
-	
-	// TODO: Delete image if there is one associated with need
-
 	try {
-		let result = await queries.deleteNeed(req.params.needid)
+		// Delete any image associated with the need
+		let result = await queries.getNeed(req.params.needid)
+		if (result.rows[0].need_image_url) {
+			await deleteImage(need_image_url)
+		}
+		await queries.deleteNeed(req.params.needid)
 		res.status(200).send({ message: MESSAGES.SUCCESS.DELETED_NEED })
 	} catch(err) {
 		handleErr(err)
@@ -235,10 +225,24 @@ router.get('/:orgid/needs/:needid/extend', Session.verifySession(), mw.verifyOrg
 /* Set need fulfilled (agency) */
 router.get('/:orgid/needs/:needid/set-fulfilled', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
 
-	// TODO: Send email to elise when need set as fulfilled? 
+	// TODO: Lots of single queries here, could join them together.
 
 	try {
-		let result = await queries.setNeedFulfilled(req.params.needid)
+		// Check if need is not already fulfilled
+		let result = await queries.getNeed(req.params.needid)
+		if (result.rows[0].fulfilled) {
+			throw("Need already fulfilled")
+		}
+
+		await queries.setNeedFulfilled(req.params.needid)
+		let _result = await queries.getOrganizationEmailbyId(req.params.orgid)
+
+		// Update total number of fulfilled needs for the website
+		await queries.incrementTotalNeedsFulfilled()
+
+		// Send e-mail with call to action to organization
+		await email.sendNeedFulfilledCallToAction(_result.rows[0].email)
+
 		res.status(200).send({ message: MESSAGES.SUCCESS.SET_NEED_FULFILLED })
 	} catch(err) {
 		handleErr(err)
@@ -286,6 +290,9 @@ router.post('/:orgid/needs/:needid/fulfil', Session.verifySession({sessionRequir
 
 			// Add a 'reminder' to the database (adding need id and org id)
 			await queries.addFulfilledNeedReminder(_result.rows[0].id, req.params.orgid)
+
+			// Update need 'contacted' and 'contacted_at' fields
+			await queries.updateNeedContacted(req.params.needid)
 
 			let orgEmail = result.rows[0].email
 			let need = _result.rows[0]

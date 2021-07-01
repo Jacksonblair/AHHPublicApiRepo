@@ -24,4 +24,26 @@ router.get('/supporters', async (req, res) => {
 	}
 })
 
+/* Get total fulfilled needs */
+router.get('/total-fulfilled-needs', async (req, res) => {
+	try {
+		let result = await queries.getTotalFulfilledNeeds()
+		res.status(200).send({ message: "Successfully got total fulfilled needs", count: result.rows[0].count })
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send({ message: "Could not get total fulfilled needs" })
+	}
+})
+
+/* Adjust total fullfilled needs */
+router.put('/total-fulfilled-needs', async (req, res) => {
+	try {
+		let result = await queries.adjustTotalFulfilledNeeds(req.body.amount)
+		res.status(200).send({ message: "Successfully adjust total fulfilled needs", count: result.rows[0].count })
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send({ message: "Could not adjust total fulfilled needs" })
+	}
+})
+
 module.exports = router

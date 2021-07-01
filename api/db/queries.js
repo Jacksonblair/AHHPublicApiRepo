@@ -91,7 +91,23 @@ module.exports = {
 		return db.query(`UPDATE supporters SET list = $1`, [supporters])
 	},
 
+
+
+
+
 	/* Org queries */
+
+	incrementTotalNeedsFulfilled: () => {
+		return db.query(`UPDATE total_needs_fulfilled SET count = count + 1`)
+	},
+
+	adjustTotalFulfilledNeeds: (amount) => {
+		return db.query(`UPDATE total_needs_fulfilled SET count = count + $1 RETURNING *`, [amount])
+	},
+
+	getTotalFulfilledNeeds: () => {
+		return db.query(`SELECT * from total_needs_fulfilled`)
+	},
 
 	getOrganizationProfileById: (id) => {
 		return db.query(`SELECT 
@@ -272,9 +288,28 @@ module.exports = {
 			WHERE id = $1`, [id])
 	},
 
+	setNeedContacted: (id) => {
+		return db.query(`UPDATE needs SET 
+		contacted = True, 
+		last_contacted_at = NOW() 
+		WHERE id = $1`, [id])
+	},
+
 	getNeed: (id) => {
 		return db.query(`SELECT 
-			needs.*,
+			needs.id,
+			needs.major,
+			needs.region,
+			needs.organization_id,
+			needs.name,
+			needs.details,
+			needs.requirements,
+			needs.created_at,
+			needs.category,
+			needs.need_image_url,
+			needs.fulfilled,
+			to_char(needs.fulfilled_at, 'DD Mon YYYY') AS fulfilled_at,
+			needs.contacted,
 			organizations.organization_name, 
 			organizations.profile_image_url,
 			organizations.contact_name
@@ -285,7 +320,19 @@ module.exports = {
 
 	getNeedsByOrgId: (id) => {
 		return db.query(`SELECT 
-			needs.*,
+			needs.id,
+			needs.major,
+			needs.region,
+			needs.organization_id,
+			needs.name,
+			needs.details,
+			needs.requirements,
+			needs.created_at,
+			needs.category,
+			needs.need_image_url,
+			needs.fulfilled,
+			needs.contacted,
+			to_char(needs.fulfilled_at, 'DD Mon YYYY') AS fulfilled_at,
 			organizations.organization_name, organizations.profile_image_url
 			FROM needs 
 			JOIN organizations ON needs.organization_id = organizations.id
@@ -294,24 +341,24 @@ module.exports = {
 
 	getCurrentNeedsByRegion: (region) => {
 		return db.query(`SELECT 
-			needs.*,  
+			needs.id,
+			needs.major,
+			needs.region,
+			needs.organization_id,
+			needs.name,
+			needs.details,
+			needs.requirements,
+			needs.created_at,
+			needs.category,
+			needs.need_image_url,
+			needs.contacted,
+			to_char(needs.fulfilled_at, 'DD Mon YYYY') AS fulfilled_at,
 			organizations.organization_name
 			FROM needs 
 			JOIN organizations ON needs.organization_id = organizations.id
 			WHERE needs.region = $1 AND needs.fulfilled != True AND needs.approved = True
 			ORDER BY needs.major DESC`, [region])
 	},
-
-	getCurrentNeeds: () => {
-		return db.query(`SELECT 
-			needs.*,
-			organizations.organization_name
-			FROM needs 
-			JOIN organizations ON needs.organization_id = organizations.id
-			WHERE need.fulfilled != true
-			ORDER BY needs.major DESC`)
-	},
-
 
 
 
@@ -410,7 +457,7 @@ module.exports = {
 	addFulfilledNeedReminder: (needId, orgId) => {
 		return db.query(`INSERT INTO fulfilled_need_reminders 
 		(need_id, organization_id, target_date) 
-		VALUES ($1, $2, NOW() + INTERVAL '2 weeks') 
+		VALUES ($1, $2, NOW() + INTERVAL '1 minute') 
 		ON CONFLICT DO NOTHING`, [needId, orgId])
 	},
 
@@ -454,6 +501,10 @@ module.exports = {
 
 	TABLES:
 	
+	CREATE TABLE total_needs_fulfilled (
+		count INTEGER NOT NULL DEFAULT 0
+	)
+
 	CREATE TABLE supporters (
 		list TEXT
 	)
@@ -518,8 +569,10 @@ module.exports = {
 		created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 		need_image_url VARCHAR(200) DEFAULT NULL,
 		fulfilled BOOL NOT NULL DEFAULT false,
-		fulfilled_date TIMESTAMPTZ,
-		approved BOOL NOT NULL DEFAULT false
+		fulfilled_at TIMESTAMPTZ,
+		approved BOOL NOT NULL DEFAULT false,
+		contacted BOOL NOT NULL DEFAULT false,
+		last_contacted_at TIMESTAMPTZ
 	);
 
 	CREATE TABLE fulfilled_need_reminders (

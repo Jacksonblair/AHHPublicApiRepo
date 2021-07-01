@@ -46,22 +46,35 @@ router.get('/org', Session.verifySession(), mw.verifyAdmin, async (req, res) => 
 router.put('/needs/:needid/toggle-major', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
 	try {
 		await queries.toggleNeedMajor(req.params.needid)
-		res.status(200).send({ message: MESSAGES.SUCCESS.TOGGLED_NEED_MAJOR })
+		let result = await queries.adminGetAllNeeds()
+		res.status(200).send({ message: MESSAGES.SUCCESS.TOGGLED_NEED_MAJOR, needs: result.rows })
 	} catch(err) {
 		handleErr(err)
 		res.status(400).send({ message: MESSAGES.ERROR.CANT_UPDATE_NEED })
 	}
-
 })
 
 /* Toggle 'approved' flag on need */
 router.put('/needs/:needid/toggle-approved', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
 	try {
 		await queries.toggleNeedApproved(req.params.needid)
-		res.status(200).send({ message: MESSAGES.SUCCESS.TOGGLED_NEED_APPROVAL })
+		let result = await queries.adminGetAllNeeds()
+		res.status(200).send({ message: MESSAGES.SUCCESS.TOGGLED_NEED_APPROVAL, needs: result.rows })
 	} catch(err) {
 		handleErr(err)
 		res.status(400).send({ message: MESSAGES.ERROR.CANT_TOGGLE_NEED_APPROVAL })
+	}
+})
+
+/* Delete need */
+router.delete('/needs/:needid/', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
+	try {
+		await queries.deleteNeed(req.params.needid)
+		let result = await queries.adminGetAllNeeds()
+		res.status(200).send({ message: MESSAGES.SUCCESS.DELETED_NEED, needs: result.rows })
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send({ message: MESSAGES.ERROR.CANT_DELETE_NEED })
 	}
 })
 
@@ -175,21 +188,15 @@ router.post('/supporters/delete', Session.verifySession(), mw.verifyAdmin, async
 	}
 })
 
-/* Delete need */
-router.delete('/needs/:needid/', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
-	try {
-		await queries.deleteNeed(req.params.needid)
-		res.status(200).send({ message: MESSAGES.SUCCESS.DELETED_NEED })
-	} catch(err) {
-		handleErr(err)
-		res.status(400).send({ message: MESSAGES.ERROR.CANT_DELETE_NEED })
-	}
-})
-
 /* Toggle 'approved' flag on organization */
 router.put('/org/:orgid/toggle-approved', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
 	try {
 		await queries.toggleOrganizationApproved(req.params.orgid)
+		let result = await queries.getOrganizationEmailbyId(req.params.orgid)
+
+		// Send e-mail to organization notifying of approval
+		email.sendOrganizationApprovalNotification(result.rows[0].email)
+
 		let updatedOrganizations = await queries.adminGetAllOrganizations()
 		res.status(200).send({ message: MESSAGES.SUCCESS.TOGGLED_ORG_APPROVAL, orgs: updatedOrganizations.rows })
 	} catch(err) {
@@ -200,9 +207,6 @@ router.put('/org/:orgid/toggle-approved', Session.verifySession(), mw.verifyAdmi
 
 /* Admin logging in*/
 router.post('/login', async(req, res) => {
-
-	console.log(req.body)
-
 	try {
 		let result = await queries.getAdminByEmail(req.body.email)
 		if (!result.rows[0]) {
@@ -227,7 +231,6 @@ router.post('/login', async(req, res) => {
 		handleErr(err)
 		res.status(400).send({ message: MESSAGES.ERROR.CANT_LOG_IN })
 	}
-
 })
 
 module.exports = router
