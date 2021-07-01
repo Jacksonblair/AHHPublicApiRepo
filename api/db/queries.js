@@ -123,7 +123,8 @@ module.exports = {
 		city,
 		state,
 		postcode,
-		country
+		country,
+		abn
 		FROM organizations WHERE id = $1`, [id])
 	},
 
@@ -161,6 +162,7 @@ module.exports = {
 			state = $8,
 			postcode = $9,
 			country = $10
+			abn = $11
 			WHERE id = $1`,
 			[ id,
 			details.contact_name,
@@ -171,7 +173,8 @@ module.exports = {
 			details.city,
 			details.state,
 			details.postcode,
-			details.country])
+			details.country,
+			details.abn])
 	},
 
 	updateOrganizationImage: (id, imageUrl) => {
