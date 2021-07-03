@@ -150,7 +150,22 @@ module.exports = {
         return sesClient.send(command)
     },
 
+    sendNewNeedNotification: (need) => {
+        let content = `
+        <div>
+            <p> A new need was just posted and requires approval </p>
+            <p> Name: ${need.name} </p>
+            <p> Details: ${need.details} </p>
+            <p> 
+                <a href="${getBaseUrl()}/admin"> Go to Admin Panel  </a> 
+            </p>
+        </div>
+        `
+        let params = generateParams("jtblair@deakin.edu.au", content, `ahelpinghand.com New need notification`)
 
+        let command = new SendEmailCommand(params);
+        return sesClient.send(command)
+    }
 
 
 }

@@ -117,6 +117,12 @@ router.post('/:orgid/needs/add', Session.verifySession(), mw.verifyOrgOwner, mw.
 
 	try {
 		let result = await queries.insertNeed(req.session.getUserId(), req.body)
+		
+		// Send e-mail to elise when a new need is posted
+		await email.sendNewNeedNotification(result.rows[0]) 
+
+		console.log(result.rows[0])
+
 		res.status(200).send({ message: MESSAGES.SUCCESS.ADDED_NEED, id: result.rows[0].id })
 	} catch(err) {
 		handleErr(err)
@@ -150,7 +156,7 @@ router.delete('/:orgid/needs/:needid', Session.verifySession(), mw.verifyOrgOwne
 		// Delete any image associated with the need
 		let result = await queries.getNeed(req.params.needid)
 		if (result.rows[0].need_image_url) {
-			await deleteImage(need_image_url)
+			await deleteImage(result.rows[0].need_image_url)
 		}
 		await queries.deleteNeed(req.params.needid)
 		res.status(200).send({ message: MESSAGES.SUCCESS.DELETED_NEED })
