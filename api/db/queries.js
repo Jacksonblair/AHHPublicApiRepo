@@ -241,7 +241,7 @@ module.exports = {
 			need.category,
 			need.details,
 			need.requirements,
-			need.uuid ? `https://s3.ap-southeast-2.amazonaws.com/ahelpinghandimagebucket/${need.uuid}` : ''])
+			need.uuid ? `https://s3.ap-southeast-2.amazonaws.com/ahelpinghandbucket/${need.uuid}` : ''])
 	},
 
 	updateNeed: (id, need) => {
@@ -335,6 +335,7 @@ module.exports = {
 			needs.need_image_url,
 			needs.fulfilled,
 			needs.contacted,
+			needs.approved,
 			to_char(needs.fulfilled_at, 'DD Mon YYYY') AS fulfilled_at,
 			organizations.organization_name, organizations.profile_image_url
 			FROM needs 
@@ -363,7 +364,24 @@ module.exports = {
 			ORDER BY needs.major DESC`, [region])
 	},
 
-
+	getMajorNeedsByRegion: (region) => {
+		return db.query(`SELECT
+			needs.id,
+			needs.major,
+			needs.region,
+			needs.organization_id,
+			needs.name,
+			needs.details,
+			needs.requirements,
+			needs.created_at,
+			needs.category,
+			needs.need_image_url,
+			organizations.organization_name
+			FROM needs 
+			JOIN organizations ON needs.organization_id = organizations.id
+			WHERE needs.region = $1 AND needs.fulfilled != True AND needs.approved = True AND needs.major = True
+			`, [region])
+	},
 
 	/* Password and email reset */
 
@@ -462,6 +480,10 @@ module.exports = {
 		(need_id, organization_id, target_date) 
 		VALUES ($1, $2, NOW() + INTERVAL '1 minute') 
 		ON CONFLICT DO NOTHING`, [needId, orgId])
+	},
+
+	deleteFulfilledNeedReminder: (needId) => {
+		return db.query(`DELETE FROM fulfilled_need_reminders WHERE need_id = $1`, [needId])
 	},
 
 	// Extends fulfilled_need_reminder target_date, and sets reminder_sent back to false

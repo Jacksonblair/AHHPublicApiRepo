@@ -44,7 +44,7 @@ router.get('/confirm-update-email/:uuid', Session.verifySession({sessionRequired
 
 router.post('/org/:orgid/change-email', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
 
-	let currentEmail = req.session.getJWTPayload()["email"]
+		let currentEmail = req.session.getJWTPayload()["email"]
 	let userId = req.session.getUserId()
 
 	if (!validation.validateEmail(req.body.email)) {
@@ -216,8 +216,10 @@ router.post('/org/login', async (req, res) => {
 	    await Session.createNewSession(res, result.rows[0].id.toString(), 
 	    { // JWT payload
 	    	email: result.rows[0].email,
+	    	organization_name: result.rows[0].organization_name,
 	    	role: "org",
-	    	approved: result.rows[0].approved
+	    	approved: result.rows[0].approved,
+	    	profile_image_url: result.rows[0].profile_image_url
 	    })
 	    res.status(200).send({ message: MESSAGES.SUCCESS.LOGGED_IN })
 

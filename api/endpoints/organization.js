@@ -77,12 +77,19 @@ router.put('/:orgid/image', Session.verifySession(), mw.verifyOrgOwner, async (r
 			await deleteImage(result.rows[0].profile_image_url)
 		}
 
-		let _result = await queries.updateOrganizationImage(req.session.getUserId(), `https://s3.ap-southeast-2.amazonaws.com/ahelpinghandimagebucket/${req.body.uuid}`)
-		if (_result.rowCount == 1) {
-			res.status(200).send({ message: MESSAGES.SUCCESS.UPDATED_ORG_PROFILE})
-		} else {
-			res.status(400).send({ message: MESSAGES.ERROR.CANT_UPDATE_ORG_PROFILE})
-		}
+		let _result = await queries.updateOrganizationImage(req.session.getUserId(), `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_BUCKET_NAME}/${req.body.uuid}`)
+
+		// Update session with new profile picture
+   		await Session.createNewSession(res, result.rows[0].id.toString(), 
+	    {
+	    	email: result.rows[0].email,
+	    	organization_name: result.rows[0].organization_name,
+	    	role: "org",
+	    	approved: result.rows[0].approved,
+	    	profile_image_url: `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_BUCKET_NAME}/${req.body.uuid}`
+	    })
+
+		res.status(200).send({ message: MESSAGES.SUCCESS.UPDATED_ORG_PROFILE})
 	} catch(err) {
 		handleErr(err)
 		res.status(400).send({ message: MESSAGES.ERROR.CANT_UPDATE_ORG_PROFILE})
@@ -117,7 +124,8 @@ router.post('/:orgid/needs/add', Session.verifySession(), mw.verifyOrgOwner, mw.
 
 	try {
 		let result = await queries.insertNeed(req.session.getUserId(), req.body)
-		
+
+		// TODO: Uncomment this when email sorted
 		// Send e-mail to elise when a new need is posted
 		await email.sendNewNeedNotification(result.rows[0]) 
 
@@ -196,8 +204,7 @@ router.put('/:orgid/needs/:needid', Session.verifySession(), async (req, res) =>
 		return
 	}
 
-	// TODO: Delete old image from amazon
-
+	// Delete old image from amazon
 	try {
 		// Get old need first to check if we need to delete an existing image from S3
 		console.log("Checking for old image url")
@@ -231,7 +238,7 @@ router.get('/:orgid/needs/:needid/extend', Session.verifySession(), mw.verifyOrg
 /* Set need fulfilled (agency) */
 router.get('/:orgid/needs/:needid/set-fulfilled', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
 
-	// TODO: Lots of single queries here, could join them together.
+	// TODO: Get a client instead of querying individually
 
 	try {
 		// Check if need is not already fulfilled
@@ -245,6 +252,9 @@ router.get('/:orgid/needs/:needid/set-fulfilled', Session.verifySession(), mw.ve
 
 		// Update total number of fulfilled needs for the website
 		await queries.incrementTotalNeedsFulfilled()
+
+		// Delete any reminders associated with that need
+		await email.deleteFulfilledNeedReminder(req.params.needid)
 
 		// Send e-mail with call to action to organization
 		await email.sendNeedFulfilledCallToAction(_result.rows[0].email)
@@ -298,7 +308,7 @@ router.post('/:orgid/needs/:needid/fulfil', Session.verifySession({sessionRequir
 			await queries.addFulfilledNeedReminder(_result.rows[0].id, req.params.orgid)
 
 			// Update need 'contacted' and 'contacted_at' fields
-			await queries.updateNeedContacted(req.params.needid)
+			await queries.setNeedContacted(req.params.needid)
 
 			let orgEmail = result.rows[0].email
 			let need = _result.rows[0]

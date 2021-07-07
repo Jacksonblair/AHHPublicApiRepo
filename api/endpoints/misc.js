@@ -24,6 +24,17 @@ router.get('/supporters', async (req, res) => {
 	}
 })
 
+/* Get major needs for a region */
+router.get('/major-needs/:region', async (req, res) => {
+	try {
+		let result = await queries.getMajorNeedsByRegion(req.params.region)
+		res.status(200).send({ message: `Successfully got major needs for ${req.params.region}`, needs: result.rows })
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send({ message: "Could not get major needs for region" })
+	}
+})
+
 /* Get total fulfilled needs */
 router.get('/total-fulfilled-needs', async (req, res) => {
 	try {

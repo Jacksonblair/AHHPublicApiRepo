@@ -12,11 +12,6 @@ const { v4: uuidv4 } = require('uuid')
 // Create Amazon client object
 const s3 = new S3({ region: process.env.AWS_REGION });
 
-// Bucket parameters
-const bucketParams = {
-	Bucket: process.env.AWS_S3_BUCKET_NAME
-}
-
 // Max / min file size
 const maxFileSize = 1024 * 1024 * 5
 const minFileSize = 1024 // About .1 mb
@@ -84,7 +79,7 @@ let deleteImage = async (url) => {
 	let uuid = url.substr(url.length - 36, url.length)
 
 	var params = {
-		Bucket: "ahelpinghandimagebucket", 
+		Bucket: process.env.AWS_BUCKET_NAME, 
 		Key: uuid
 	}
 

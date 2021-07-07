@@ -114,7 +114,7 @@ router.post('/impacts/add', Session.verifySession(), mw.verifyAdmin, async (req,
 	// If there are any uuids in the body, we need to format them a ',' separated string
 	// And store that in the impact_image_urls as text
 	let uuids = req.body.uuids.map((uuid) => {
-		return `https://s3.ap-southeast-2.amazonaws.com/ahelpinghandimagebucket/${uuid}`
+		return `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_BUCKET_NAME}/${uuid}`
 	})
 	req.body.urls = uuids.join(',')
 
@@ -148,7 +148,7 @@ router.put('/impacts/:impactid', Session.verifySession(), mw.verifyAdmin, async 
 
 		// Format new image urls
 		let newUrls = req.body.uuids.map((uuid) => {
-			return `https://s3.ap-southeast-2.amazonaws.com/ahelpinghandimagebucket/${uuid}`
+			return `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_BUCKET_NAME}/${uuid}`
 		})
 
 		// Join existing and new together and update row	
