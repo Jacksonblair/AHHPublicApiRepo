@@ -91,7 +91,7 @@ module.exports = {
 		if (!need.details) return false
 		if (!need.region) return false
 		if (!["geelong", "corangamite", "warnambool"].includes(need.region.toLowerCase())) return false
-		if (!["educational", "housing", "sports-and-social", "parenting-and-baby", "job-help-or-mentoring"].includes(need.category.toLowerCase())) return false
+		if (!["educational", "living", "sports-and-social", "parenting-and-baby", "job-help-or-mentoring"].includes(need.category.toLowerCase())) return false
 		return true
 	},
 

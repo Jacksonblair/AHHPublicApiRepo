@@ -254,7 +254,7 @@ router.get('/:orgid/needs/:needid/set-fulfilled', Session.verifySession(), mw.ve
 		await queries.incrementTotalNeedsFulfilled()
 
 		// Delete any reminders associated with that need
-		await email.deleteFulfilledNeedReminder(req.params.needid)
+		await need.deleteFulfilledNeedReminder(req.params.needid)
 
 		// Send e-mail with call to action to organization
 		await email.sendNeedFulfilledCallToAction(_result.rows[0].email)

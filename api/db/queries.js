@@ -478,7 +478,7 @@ module.exports = {
 	addFulfilledNeedReminder: (needId, orgId) => {
 		return db.query(`INSERT INTO fulfilled_need_reminders 
 		(need_id, organization_id, target_date) 
-		VALUES ($1, $2, NOW() + INTERVAL '1 minute') 
+		VALUES ($1, $2, NOW() + INTERVAL '2 weeks') 
 		ON CONFLICT DO NOTHING`, [needId, orgId])
 	},
 

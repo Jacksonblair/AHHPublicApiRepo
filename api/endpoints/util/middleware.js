@@ -12,7 +12,9 @@ module.exports = {
 	},
 
 	verifyApproved: async (req, res, next) => {
-		if (req.session.getJWTPayload()["approved"]) {
+		let session = req.session.getJWTPayload()
+		console.log(session)
+		if (session["approved"]) {
 			next()
 		} else {
 			res.status(400).send({ message: MESSAGES.ERROR.ORG_NOT_APPROVED })
