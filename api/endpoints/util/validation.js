@@ -87,7 +87,7 @@ module.exports = {
 		}
 
 		if (!need.name) return false
-		if (!need.name.length > 35) return false
+		if (need.name.length > 35) return false
 		if (!need.details) return false
 		if (!need.region) return false
 		if (!["geelong", "corangamite", "warnambool"].includes(need.region.toLowerCase())) return false
