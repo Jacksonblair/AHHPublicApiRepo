@@ -249,7 +249,13 @@ router.get('/:orgid/needs/:needid/set-fulfilled', Session.verifySession(), mw.ve
 
 		await queries.setNeedFulfilled(req.params.needid)
 		let _result = await queries.getOrganizationEmailbyId(req.params.orgid)
+		res.status(200).send({ message: MESSAGES.SUCCESS.SET_NEED_FULFILLED })
+	} catch(err) {
+		handleErr(err)
+		res.status(400).send({ message: MESSAGES.ERROR.CANT_SET_NEED_FULFILLED })	
+	}
 
+	try {
 		// Update total number of fulfilled needs for the website
 		await queries.incrementTotalNeedsFulfilled()
 
@@ -258,11 +264,8 @@ router.get('/:orgid/needs/:needid/set-fulfilled', Session.verifySession(), mw.ve
 
 		// Send e-mail with call to action to organization
 		await email.sendNeedFulfilledCallToAction(_result.rows[0].email)
-
-		res.status(200).send({ message: MESSAGES.SUCCESS.SET_NEED_FULFILLED })
 	} catch(err) {
 		handleErr(err)
-		res.status(400).send({ message: MESSAGES.ERROR.CANT_SET_NEED_FULFILLED })	
 	}
 
 })
