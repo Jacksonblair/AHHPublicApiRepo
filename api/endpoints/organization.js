@@ -145,7 +145,9 @@ router.get('/:orgid/needs/:needid', async (req, res) => {
 
 		// Alternate response for any other website aside from our client
 		// Basically just to send correct Meta tags to facebook for sharing needs
-		if (req.headers.referer == `${process.env.WEBSITE_URL}` || req.headers.referer == 'http://localhost:3000/') {
+		console.log(req.headers.referer)
+
+		if (req.headers.referer == "https://www.ahelpinghand.com.au" || req.headers.referer == 'http://localhost:3000/') {
 			res.status(200).send({ message: MESSAGES.SUCCESS.GOT_NEED, need: result.rows[0] })
 		} else {
 			// If result.rows[0].need_image_url is not truthy
