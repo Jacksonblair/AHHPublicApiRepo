@@ -8,7 +8,7 @@ let generateParams = (destination, content, subject) => {
     return {
         Destination: {
             /* required */
-            ToAddresses: [ destination
+            ToAddresses: [ ...destination
                 /* more To-email addresses */
             ],
         },
@@ -26,7 +26,7 @@ let generateParams = (destination, content, subject) => {
                 Data: subject,
             },
         },
-        Source: "jackson.blair@live.com" // SENDER_ADDRESS    
+        Source: "ahelpinghand.com.au" // SENDER_ADDRESS    
     }
 }
 
@@ -43,7 +43,7 @@ module.exports = {
                     Please share your stories along with any photos you have by emailing elise@ahelpinghand.com.au. 
                 </p>
             </div> `
-        let params = generateParams("jtblair@deakin.edu.au", content, "ahelpinghand.com About your fulfilled need")
+        let params = generateParams([destination], content, "ahelpinghand.com About your fulfilled need")
         let command = new SendEmailCommand(params);
         return sesClient.send(command)
     },
@@ -67,7 +67,7 @@ module.exports = {
                     Elise McKinnon
                 </p>
             </div> `
-        let params = generateParams("jtblair@deakin.edu.au", content, "ahelpinghand.com Organization approval notification")
+        let params = generateParams([destination], content, "ahelpinghand.com Organization approval notification")
         let command = new SendEmailCommand(params);
         return sesClient.send(command)
     },
@@ -80,7 +80,7 @@ module.exports = {
                 <a href="${confirmationLink}">${confirmationLink}</a>
             </div>
         `
-        let params = generateParams("jtblair@deakin.edu.au", content, "ahelpinghand.com Password reset confirmation")
+        let params = generateParams([destination], content, "ahelpinghand.com Password reset confirmation")
         let command = new SendEmailCommand(params);
         return sesClient.send(command)
     },
@@ -94,7 +94,7 @@ module.exports = {
                 <a href="${confirmationLink}">${confirmationLink}</a>
             </div>
         `
-        let params = generateParams("jtblair@deakin.edu.au", content, "ahelpinghand.com Email change confirmation")
+        let params = generateParams([destination], content, "ahelpinghand.com Email change confirmation")
         
         let command = new SendEmailCommand(params);
         return sesClient.send(command)
@@ -116,7 +116,7 @@ module.exports = {
             </div>
         `
 
-        let params = generateParams("jtblair@deakin.edu.au", content, `ahelpinghand.com Need fulfilment message about: ${need.name}`)
+        let params = generateParams([destination], content, `ahelpinghand.com Need fulfilment message about: ${need.name}`)
 
         let command = new SendEmailCommand(params);
         return sesClient.send(command)
@@ -144,7 +144,7 @@ module.exports = {
             </div>
         `
 
-        let params = generateParams("jtblair@deakin.edu.au", content, `ahelpinghand.com Need reminder for: ${reminder.name}`)
+        let params = generateParams([destination], content, `ahelpinghand.com Need reminder for: ${reminder.name}`)
 
         let command = new SendEmailCommand(params);
         return sesClient.send(command)
@@ -161,16 +161,31 @@ module.exports = {
             </p>
         </div>
         `
-        let params = generateParams("jtblair@deakin.edu.au", content, `ahelpinghand.com New need notification`)
+        let params = generateParams(["elise@ahelpinghand.com.au", "janneke@ahelpinghand.com.au"], content, `ahelpinghand.com New need notification`)
 
         let command = new SendEmailCommand(params);
         return sesClient.send(command)
-    }
+    },
 
+    sendNewOrgNotification: (org) => {
+        let content = `
+        <div>
+            <p> A new organization just registered and requires approval </p>
+            <p> Name: ${org.organization_name} </p>
+            <p> 
+                <a href="${getBaseUrl()}/admin"> Go to Admin Panel  </a> 
+            </p>
+        </div>
+        `
+        let params = generateParams(["elise@ahelpinghand.com.au", "janneke@ahelpinghand.com.au"], content, `ahelpinghand.com New organization notification`)
+
+        let command = new SendEmailCommand(params);
+        return sesClient.send(command)     
+    }
 
 }
 
 let getBaseUrl = () => {
-    let url = process.env.NODE_ENV == "development" ? "http://localhost:3000" : "https://ahelpinghandclient.herokuapp.com"
+    let url = process.env.NODE_ENV == "development" ? "http://localhost:3000" : process.env.CLIENT_URL
     return url
 }
