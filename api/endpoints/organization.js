@@ -145,12 +145,12 @@ router.get('/:orgid/needs/:needid', async (req, res) => {
 
 		// Alternate response for any other website aside from our client
 		// Basically just to send correct Meta tags to facebook for sharing needs
-		if (req.headers.referer == process.env.CLIENT_URL || req.headers.referer == 'http://localhost:3000/') {
+		if (req.headers.referer == process.env.WEBSITE_URL || req.headers.referer == 'http://localhost:3000/') {
 			res.status(200).send({ message: MESSAGES.SUCCESS.GOT_NEED, need: result.rows[0] })
 		} else {
 			// If result.rows[0].need_image_url is not truthy
 			// Overwrite it with a link to a default need sharing image url
-			res.send(getNeedMetaTags(`${process.env.CLIENT_URL}/org/${req.params.orgid}/needs/${req.params.needid}`, result.rows[0]))
+			res.send(getNeedMetaTags(`${process.env.WEBSITE_URL}/org/${req.params.orgid}/needs/${req.params.needid}`, result.rows[0]))
 		}
 	} catch(err) {
 		handleErr(err)
