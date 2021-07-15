@@ -127,7 +127,7 @@ router.post('/:orgid/needs/add', Session.verifySession(), mw.verifyOrgOwner, mw.
 
 		// TODO: Uncomment this when email sorted
 		// Send e-mail to elise when a new need is posted
-		await email.sendNewNeedNotification(result.rows[0]) 
+		// await email.sendNewNeedNotification(result.rows[0]) 
 
 		console.log(result.rows[0])
 

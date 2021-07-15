@@ -361,7 +361,7 @@ module.exports = {
 			FROM needs 
 			JOIN organizations ON needs.organization_id = organizations.id
 			WHERE needs.region = $1 AND needs.fulfilled != True AND needs.approved = True
-			ORDER BY needs.major DESC`, [region])
+			ORDER BY needs.created_at DESC`, [region])
 	},
 
 	getMajorNeedsByRegion: (region) => {
@@ -505,7 +505,7 @@ module.exports = {
 	/* Misc */
 
 	getImpacts: async () => {
-		return db.query('SELECT * FROM impacts ORDER BY created_at')
+		return db.query('SELECT * FROM impacts ORDER BY created_at DESC')
 	},
 
 	getSupporters: async () => {
