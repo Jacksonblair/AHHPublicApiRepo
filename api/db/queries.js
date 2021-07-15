@@ -58,7 +58,7 @@ module.exports = {
 		(NOW() - target_date) AS time_expired
 		FROM needs LEFT OUTER JOIN fulfilled_need_reminders 
 		ON needs.id = fulfilled_need_reminders.need_id 
-		ORDER BY needs.created_at`)
+		ORDER BY needs.created_at DESC`)
 	},
 
 	adminAddImpact: (details) => {
