@@ -32,11 +32,11 @@ module.exports = {
 		if (!re.test(values.postcode)) return false
 		if (!values.country) return false
 		if (values.tos != 'true') return false
-		if (!values.abn) return false
+/*		if (!values.abn) return false
 		// Basic regex for validating ABN. Just checks digit length. Does not check real validity
 		// https://abr.business.gov.au/Help/AbnFormat
 		re = new RegExp('^([0-9]){11}$')
-		if (!re.test(values.abn)) return false
+		if (!re.test(values.abn)) return false*/
 
 		return true
 	},
