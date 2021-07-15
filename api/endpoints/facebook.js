@@ -18,14 +18,24 @@ const getJSON = bent('json')
 	- graph api tool
 */
 
+let pageIds = {
+	"corangamite": process.env.FB_CORANGAMITE_PAGE_ID,
+	"warrnambool": process.env.FB_WARRNAMBOOL_PAGE_ID,
+	"geelong": process.env.FB_GEELONG_PAGE_ID
+}
 
 router.get('/:region', async (req, res) => {
+
+
+	console.log("Getting fb feed")
 
 	// TODO: Get facebook feed based on region param
 	// TODO: Gonna need credentials for each facebook page
 
 	try {
-		let result = await getJSON(`https://graph.facebook.com/101997734969550/feed?fields=story,message,created_time,attachments,child_attachments&access_token&limit=20&access_token=${process.env.FB_LONG_LIVED_PAGE_ACCESS_TOKEN}`)
+		let query = `https://graph.facebook.com/${pageIds[req.params.region]}/feed?fields=story,message,created_time,attachments,child_attachments&access_token&limit=20&access_token=${process.env.FB_LONG_LIVED_PAGE_ACCESS_TOKEN}`
+		console.log(query)
+		let result = await getJSON(query)
 		res.json(result)
 	} catch(err) {
 		handleErr(err)
