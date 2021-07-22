@@ -9,6 +9,7 @@ let generateParams = (destinations, content, subject) => {
         Destination: {
             /* required */
             ToAddresses: Array.isArray(destinations) ? destinations : [ destinations ]
+        },
         Message: {
             /* required */
             Body: {
