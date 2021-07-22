@@ -5,10 +5,13 @@ const { v4: uuidv4 } = require('uuid')
 const sesClient = new SESClient({ region: process.env.AWS_REGION });
 
 let generateParams = (destinations, content, subject) => {
+    console.log("Generating params for email")
+    console.log("Destination: " + Array.isArray(destinations) ? destinations.toString() : destinations )
+
     return {
         Destination: {
             /* required */
-            ToAddresses: Array.isArray(destinations) ? destinations : [ destinations ]
+            ToAddresses: Array.isArray(destinations) ? destinations.toString() : destinations
         },
         Message: {
             /* required */
