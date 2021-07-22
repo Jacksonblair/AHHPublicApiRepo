@@ -11,8 +11,7 @@ let generateParams = (destinations, content, subject) => {
     return {
         Destination: {
             /* required */
-            // ToAddresses: Array.isArray(destinations) ? destinations.toString() : destinations
-            ToAddresses: "jackson.blair@live.com",
+            ToAddresses: Array.isArray(destinations) ? destinations.toString() : destinations
         },
         Message: {
             /* required */
