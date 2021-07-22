@@ -253,7 +253,7 @@ router.get('/:orgid/needs/:needid/set-fulfilled', Session.verifySession(), mw.ve
 		// Update total number of fulfilled needs for the website
 		await queries.incrementTotalNeedsFulfilled()
 		// Delete any reminders associated with that need
-		await need.deleteFulfilledNeedReminder(req.params.needid)
+		await queries.deleteFulfilledNeedReminder(req.params.needid)
 
 		// Then get organizations registered email
 		let orgRows = await queries.getOrganizationEmailbyId(req.params.orgid)
