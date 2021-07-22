@@ -240,37 +240,41 @@ router.get('/:orgid/needs/:needid/extend', Session.verifySession(), mw.verifyOrg
 
 /* Set need fulfilled (agency) */
 router.get('/:orgid/needs/:needid/set-fulfilled', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
-
-	// TODO: Get a client instead of querying individually
-
 	try {
-		// Check if need is not already fulfilled
-		let result = await queries.getNeed(req.params.needid)
-		if (result.rows[0].fulfilled) {
-			throw("Need already fulfilled")
+		let needRows = await queries.getNeed(req.params.id)
+		
+		// Check if need is fulfilled
+		if (needRows.rows && needRows.rows[0] && needRows.rows[0].fulfilled == true) {
+			return res.status(400).send("Need is already fulfilled")
 		}
 
+		// Otherwise set as fulfilled
 		await queries.setNeedFulfilled(req.params.needid)
-		let _result = await queries.getOrganizationEmailbyId(req.params.orgid)
-		res.status(200).send({ message: MESSAGES.SUCCESS.SET_NEED_FULFILLED })
-	} catch(err) {
-		handleErr(err)
-		res.status(400).send({ message: MESSAGES.ERROR.CANT_SET_NEED_FULFILLED })	
-	}
 
-	try {
+		// Then get organizations registered email
+		let orgRows = await queries.getOrganizationEmailbyId(req.params.orgid)
+
+		// Check if it exists
+		if (!orgRows.rows[0]) {
+			return res.status(400).send("Organisation with that e-mail does not exist")
+		}
+
+		// Then send a fulfilment Cta email to it
+		await email.sendNeedFulfilledCallToAction(orgRows.rows[0].email)
+
+		// And return success message
+		res.status(200).send("Fulfilled need")
+
+		// Afterwards..
+
 		// Update total number of fulfilled needs for the website
 		await queries.incrementTotalNeedsFulfilled()
-
 		// Delete any reminders associated with that need
 		await need.deleteFulfilledNeedReminder(req.params.needid)
-
-		// Send e-mail with call to action to organization
-		await email.sendNeedFulfilledCallToAction(_result.rows[0].email)
 	} catch(err) {
 		handleErr(err)
+		res.status(400).send("Server error")
 	}
-
 })
 
 /* Fulfil a need (public) */

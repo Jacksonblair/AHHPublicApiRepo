@@ -4,14 +4,11 @@ const { v4: uuidv4 } = require('uuid')
 // Create SES service object.
 const sesClient = new SESClient({ region: process.env.AWS_REGION });
 
-let generateParams = (destination, content, subject) => {
+let generateParams = (destinations, content, subject) => {
     return {
         Destination: {
             /* required */
-            ToAddresses: [ ...destination
-                /* more To-email addresses */
-            ],
-        },
+            ToAddresses: Array.isArray(destinations) ? destinations : [ destinations ]
         Message: {
             /* required */
             Body: {
@@ -31,7 +28,6 @@ let generateParams = (destination, content, subject) => {
 }
 
 module.exports = {
-
     sendNeedFulfilledCallToAction: (destination) => {
         let content = `
             <div>
@@ -43,7 +39,7 @@ module.exports = {
                     Please share your stories along with any photos you have by emailing elise@ahelpinghand.com.au. 
                 </p>
             </div>`
-        let params = generateParams([destination], content, "ahelpinghand.com About your fulfilled need")
+        let params = generateParams(destination, content, "ahelpinghand.com About your fulfilled need")
         let command = new SendEmailCommand(params);
         return sesClient.send(command)
     },
@@ -86,7 +82,6 @@ module.exports = {
     },
 
     sendEmailChangeConfirmationRequest: (destination, uuid) => {
-
         let confirmationLink = `${getBaseUrl()}/confirm-update-email/${uuid}`
         let content = `
             <div>
@@ -117,7 +112,6 @@ module.exports = {
         `
 
         let params = generateParams([destination], content, `ahelpinghand.com Need fulfilment message about: ${need.name}`)
-
         let command = new SendEmailCommand(params);
         return sesClient.send(command)
     },
