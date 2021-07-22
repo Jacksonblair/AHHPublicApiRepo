@@ -250,10 +250,13 @@ router.get('/:orgid/needs/:needid/set-fulfilled', Session.verifySession(), mw.ve
 
 		// Otherwise set as fulfilled
 		await queries.setNeedFulfilled(req.params.needid)
+		// Update total number of fulfilled needs for the website
+		await queries.incrementTotalNeedsFulfilled()
+		// Delete any reminders associated with that need
+		await need.deleteFulfilledNeedReminder(req.params.needid)
 
 		// Then get organizations registered email
 		let orgRows = await queries.getOrganizationEmailbyId(req.params.orgid)
-
 		// Check if it exists
 		if (!orgRows.rows[0]) {
 			return res.status(400).send({ message: "Organisation with that e-mail does not exist" })
@@ -264,14 +267,6 @@ router.get('/:orgid/needs/:needid/set-fulfilled', Session.verifySession(), mw.ve
 
 		// And return success message
 		res.status(200).send({ message: "Fulfilled need" })
-
-		// Afterwards..
-
-		// Update total number of fulfilled needs for the website
-		await queries.incrementTotalNeedsFulfilled()
-		
-		// Delete any reminders associated with that need
-		await need.deleteFulfilledNeedReminder(req.params.needid)
 	} catch(err) {
 		handleErr(err)
 		res.status(400).send({ message: "Server error" })
