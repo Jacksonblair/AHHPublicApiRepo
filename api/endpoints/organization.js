@@ -245,7 +245,7 @@ router.get('/:orgid/needs/:needid/set-fulfilled', Session.verifySession(), mw.ve
 		
 		// Check if need is fulfilled
 		if (needRows.rows && needRows.rows[0] && needRows.rows[0].fulfilled == true) {
-			return res.status(400).send("Need is already fulfilled")
+			return res.status(400).send({ message: "Need is already fulfilled" })
 		}
 
 		// Otherwise set as fulfilled
@@ -256,24 +256,25 @@ router.get('/:orgid/needs/:needid/set-fulfilled', Session.verifySession(), mw.ve
 
 		// Check if it exists
 		if (!orgRows.rows[0]) {
-			return res.status(400).send("Organisation with that e-mail does not exist")
+			return res.status(400).send({ message: "Organisation with that e-mail does not exist" })
 		}
 
 		// Then send a fulfilment Cta email to it
 		await email.sendNeedFulfilledCallToAction(orgRows.rows[0].email)
 
 		// And return success message
-		res.status(200).send("Fulfilled need")
+		res.status(200).send({ message: "Fulfilled need" })
 
 		// Afterwards..
 
 		// Update total number of fulfilled needs for the website
 		await queries.incrementTotalNeedsFulfilled()
+		
 		// Delete any reminders associated with that need
 		await need.deleteFulfilledNeedReminder(req.params.needid)
 	} catch(err) {
 		handleErr(err)
-		res.status(400).send("Server error")
+		res.status(400).send({ message: "Server error" })
 	}
 })
 
@@ -298,12 +299,12 @@ router.post('/:orgid/needs/:needid/fulfil', Session.verifySession({sessionRequir
 	}
 
 	// Make sure not an admin fulfilling need
-	if (req.session) {
-		if (req.session.getJWTPayload()["role"] == "admin") {
-			res.status(400).send({ message: MESSAGES.ERROR.ADMIN_CANNOT_FULFIL_NEED })
-			return
-		}
-	}
+	// if (req.session) {
+	// 	if (req.session.getJWTPayload()["role"] == "admin") {
+	// 		res.status(400).send({ message: MESSAGES.ERROR.ADMIN_CANNOT_FULFIL_NEED })
+	// 		return
+	// 	}
+	// }
 
 	try {
 		// TODO: Get a client instead of lots of indiv. queries ??
