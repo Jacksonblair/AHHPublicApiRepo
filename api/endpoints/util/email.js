@@ -42,7 +42,7 @@ module.exports = {
                 </p><p>
                     Please share your stories along with any photos you have by emailing elise@ahelpinghand.com.au. 
                 </p>
-            </div> `
+            </div>`
         let params = generateParams([destination], content, "ahelpinghand.com About your fulfilled need")
         let command = new SendEmailCommand(params);
         return sesClient.send(command)
@@ -161,7 +161,7 @@ module.exports = {
             </p>
         </div>
         `
-        let params = generateParams([/*"elise@ahelpinghand.com.au", "janneke@ahelpinghand.com.au", */"jtblair@deakin.edu.au"], content, `ahelpinghand.com New need notification`)
+        let params = generateParams(["elise@ahelpinghand.com.au", "janneke@ahelpinghand.com.au", "jtblair@deakin.edu.au"], content, `ahelpinghand.com New need notification`)
 
         let command = new SendEmailCommand(params);
         return sesClient.send(command)
@@ -177,7 +177,7 @@ module.exports = {
             </p>
         </div>
         `
-        let params = generateParams([/*"elise@ahelpinghand.com.au", "janneke@ahelpinghand.com.au", */"jtblair@deakin.edu.au"], content, `ahelpinghand.com New organization notification`)
+        let params = generateParams(["elise@ahelpinghand.com.au", "janneke@ahelpinghand.com.au", "jtblair@deakin.edu.au"], content, `ahelpinghand.com New organization notification`)
 
         let command = new SendEmailCommand(params);
         return sesClient.send(command)     
