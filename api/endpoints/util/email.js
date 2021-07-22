@@ -27,7 +27,7 @@ let generateParams = (destinations, content, subject) => {
                 Data: subject,
             },
         },
-        Source: "ahelpinghand.com.au" // SENDER_ADDRESS    
+        Source: "noreply@ahelpinghand.com.au" // SENDER_ADDRESS    
     }
 }
 
