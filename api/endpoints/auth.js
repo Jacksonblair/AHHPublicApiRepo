@@ -173,14 +173,7 @@ router.post('/org/add', async (req, res) => {
 		res.status(400).send({ message: MESSAGES.ERROR.INVALID_ORG_DETAILS })
 		return
 	}
-
-	// TODO:
-	// When an org is added
-	// We send a email notification to elise/admin
-	// We dont start a session until they log in 
-	// Also
-	// Make sure organizations cannot be registered with an admin e-mail
-
+	
 	try {
 		// Make sure email used to register is unique
 		let orgs = await queries.getOrganizationByEmail(req.body.email.toLowerCase())
@@ -191,6 +184,9 @@ router.post('/org/add', async (req, res) => {
 		req.body.password = await bcrypt.hash(req.body.password, saltRounds)
 		await queries.insertOrganization(req.body)
 		res.status(200).send({ message: MESSAGES.SUCCESS.ADDED_ORG })	
+
+		// Send notification to elise
+		email.sendNewOrgNotification(req.body)
 	} catch(err) {
 		handleErr(err)
 		res.status(400).send({ message: err })	

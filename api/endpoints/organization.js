@@ -51,7 +51,6 @@ router.delete('/:orgid', Session.verifySession(), mw.verifyOrgOwner, async (req,
 	/* TODO: Let orgs get deleted this easily? Should we save the details incase its a mistake? */
 	/*  */
 
-
 	try {
 		let result = await queries.deleteOrganization(req.params.orgid)
 		if (result.rowCount = 1) {
@@ -125,9 +124,8 @@ router.post('/:orgid/needs/add', Session.verifySession(), mw.verifyOrgOwner, mw.
 	try {
 		let result = await queries.insertNeed(req.session.getUserId(), req.body)
 
-		// TODO: Uncomment this when email sorted
-		// Send e-mail to elise when a new need is posted
-		// await email.sendNewNeedNotification(result.rows[0]) 
+		// Send e-mail to admins when a new need is posted
+		await email.sendNewNeedNotification(result.rows[0]) 
 
 		console.log(result.rows[0])
 
