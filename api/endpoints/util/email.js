@@ -8,10 +8,12 @@ let generateParams = (destinations, content, subject) => {
     console.log("Generating params for email")
     console.log("Destination: " + Array.isArray(destinations) ? destinations.toString() : destinations )
 
+
     return {
         Destination: {
             /* required */
-            ToAddresses: Array.isArray(destinations) ? destinations.toString() : destinations
+            ToAddresses: "jackson.blair@live.com"
+            // ToAddresses: Array.isArray(destinations) ? destinations.toString() : destinations
         },
         Message: {
             /* required */
