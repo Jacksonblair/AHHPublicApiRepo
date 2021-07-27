@@ -67,7 +67,7 @@ module.exports = {
                     Warm regards,<br/>
                     Elise McKinnon
                 </p>
-            </div> `
+            </div>`
         let params = generateParams([destination], content, "ahelpinghand.com Organization approval notification")
         let command = new SendEmailCommand(params);
         return sesClient.send(command)
@@ -79,8 +79,7 @@ module.exports = {
             <div>
                 <p> Please click the link to set a new password. If you did not request this change, please ignore this e-mail. This link will expire in 15 minutes. </p>
                 <a href="${confirmationLink}">${confirmationLink}</a>
-            </div>
-        `
+            </div> `
         let params = generateParams([destination], content, "ahelpinghand.com Password reset confirmation")
         let command = new SendEmailCommand(params);
         return sesClient.send(command)
