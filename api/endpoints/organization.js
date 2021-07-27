@@ -15,6 +15,7 @@ const { deleteImage } = require('./aws')
 router.get('/:orgid/profile', async (req, res) => {
 	try {
 		let result = await queries.getOrganizationProfileById(req.params.orgid)
+		if (!result.rows.length) throw("Org doesnt exist")
 		res.status(200).send({ message: MESSAGES.SUCCESS.GOT_ORG_PROFILE, profile: result.rows[0]})
 	} catch(err) {
 		handleErr(err)

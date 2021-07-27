@@ -200,6 +200,10 @@ router.post('/supporters/delete', Session.verifySession(), mw.verifyAdmin, async
 router.put('/org/:orgid/toggle-approved', Session.verifySession(), mw.verifyAdmin, async (req, res) => {
 	try {
 		await queries.toggleOrganizationApproved(req.params.orgid)
+
+		// Revoke session for organization to force a login to get updated jwt
+		await Session.revokeAllSessionsForUser(req.params.orgid)
+
 		let result = await queries.getOrganizationEmailbyId(req.params.orgid)
 
 		// Send e-mail to organization notifying of approval

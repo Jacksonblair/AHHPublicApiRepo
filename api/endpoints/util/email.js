@@ -100,7 +100,6 @@ module.exports = {
     },
 
     sendFulfilledNeedNotification: (destination, details, need) => {
-
         let content = `
             <div>
                 <p> ${details.contact_name} has left a message regarding fulfilment of ${need.name} </p>
@@ -168,7 +167,7 @@ module.exports = {
     sendNewOrgNotification: (org) => {
         let content = `
         <div>
-            <p> A new organization just registered and requires approval </p>
+            <p> A new organisation just registered and requires approval </p>
             <p> Name: ${org.organization_name} </p>
             <p> 
                 <a href="${getBaseUrl()}/admin"> Go to Admin Panel  </a> 

@@ -129,7 +129,7 @@ module.exports = {
 	},
 
 	getOrganizationByEmail: (email) => {
-		return db.query(`SELECT * FROM organizations WHERE email = $1`, [email])
+		return db.query(`SELECT * FROM organizations WHERE email = $1`, [email.toLowerCase()])
 	},
 
 	getOrganizationEmailbyId: (id) => {

@@ -44,7 +44,7 @@ router.get('/confirm-update-email/:uuid', Session.verifySession({sessionRequired
 
 router.post('/org/:orgid/change-email', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
 
-		let currentEmail = req.session.getJWTPayload()["email"]
+	let currentEmail = req.session.getJWTPayload()["email"].toLowerCase()
 	let userId = req.session.getUserId()
 
 	if (!validation.validateEmail(req.body.email)) {
@@ -56,7 +56,7 @@ router.post('/org/:orgid/change-email', Session.verifySession(), mw.verifyOrgOwn
 
 	try {
 		// Confirm e-mail is unique first
-		let result = await queries.getOrganizationByEmail(req.body.email)
+		let result = await queries.getOrganizationByEmail(req.body.email.toLowerCase())
 		if (result.rows[0]) {
 			if (result.rows[0].id == userId) {
 				// Can't change our e-mail to the one we already have
@@ -67,7 +67,7 @@ router.post('/org/:orgid/change-email', Session.verifySession(), mw.verifyOrgOwn
 			}
 		}
 
-		await queries.insertEmailChange(uuid, userId, req.body.email)
+		await queries.insertEmailChange(uuid, userId, req.body.email.toLowerCase())
 		// After inserting row in DB, send a confirmation request to current e-mail address
 		// This will include a link confirm the UUID against the database entry
 		// After which the users email will be updated
@@ -89,22 +89,16 @@ router.post('/reset-password', async (req, res) =>{
  		Which contains a uuid which they can use to verify a password change
 	*/
 
-	console.log(req.body)
-
 	let uuid = uuidv4()
 
 	try {
 		// Check that the specified e-mail address actually exists
-
 		let result = await queries.getOrganizationByEmail(req.body.email)
-		if (!result.rows[0]) throw(MESSAGES.ERROR.COULD_NOT_RESET_ORG_PASSWORD)
-		console.log(result)
+		if (!result.rows[0]) throw(MESSAGES.ERROR.ORG_DOES_NOT_EXIST)
 
 		await queries.insertPasswordReset(uuid, result.rows[0].id)
-		await email.sendPasswordResetCode(uuid, result.rows[0].email)
-
-		console.log("ARGH")
-
+		await email.sendPasswordResetCode(result.rows[0].email, uuid)
+		
 		res.status(200).send({ message: MESSAGES.SUCCESS.SENT_PASSWORD_RESET})
 	} catch(err) {
 		handleErr(err)
@@ -121,7 +115,7 @@ router.post('/complete-reset-password/:uuid', Session.verifySession({sessionRequ
 
 	try {
 		// Validate password
-		if (!validatePassword(req.body.newPassword)) {
+		if (!validation.validatePassword(req.body.newPassword)) {
 			throw(MESSAGES.ERROR.INVALID_NEW_PASSWORD)
 		}
 
@@ -136,7 +130,7 @@ router.post('/complete-reset-password/:uuid', Session.verifySession({sessionRequ
 
 	} catch(err) {
 		handleErr(err)
-		res.status(400).send({ message: err })
+		res.status(400).send({ message: "Server error" })
 	}
 
 })
