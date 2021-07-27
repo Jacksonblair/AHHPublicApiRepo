@@ -96,13 +96,12 @@ router.post('/reset-password', async (req, res) =>{
 	try {
 		// Check that the specified e-mail address actually exists
 
-
 		let result = await queries.getOrganizationByEmail(req.body.email)
 		if (!result.rows[0]) throw(MESSAGES.ERROR.COULD_NOT_RESET_ORG_PASSWORD)
 		console.log(result)
 
 		await queries.insertPasswordReset(uuid, result.rows[0].id)
-		await email.sendPasswordResetCode(uuid)
+		await email.sendPasswordResetCode(uuid, result.rows[0].email)
 
 		console.log("ARGH")
 
