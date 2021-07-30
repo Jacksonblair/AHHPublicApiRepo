@@ -14,7 +14,7 @@ const email = require('./util/email.js')
 const mw = require('./util/middleware')
 
 
-router.get('/get-hash', async (req, res) => {
+router.post('/get-hash', async (req, res) => {
 	console.log(req.body)
 	let hash = await bcrypt.hash(req.body.password, saltRounds)
 	res.json(hash)
