@@ -37,12 +37,18 @@ module.exports = {
         let content = `
             <div>
                 <p>
-                    A big part of the success of A Helping Hand will be through letting our community know the difference they are making and ensuring we thank our generous supporters. 
+                It is wonderful to hear that another local person has received help through your efforts. Thank you for letting us know.
                 </p><p>
-                    We need your help to do this! We’d love any photos of the items, stories and thank you notes that <strong>do not identify the recipients</strong> but show the generosity of our community. It’s the beautiful stories of giving and the kindness that A Helping Hand shows and spreads that will encourage others to provide a helping hand where they can.
+                A big part of the success of A Helping Hand will be through letting our community know the difference they are making to help others. We need your help to do this!
                 </p><p>
-                    Please share your stories along with any photos you have by emailing elise@ahelpinghand.com.au. 
-                </p>
+                We would love any photos of the items, stories and thank you notes that in no way identifies the recipients but highlights the generosity of our community. It is these story that will encourage others to give a helping hand where they can.
+                </p><p>
+                Please share your stories along with any photos you have by emailing us at <strong>community@ahelpinghand.com.au.</strong>
+                </p><p>
+                Feel free to contact us any time with any questions you may have.
+                </p><p>
+                Warm regards, <br/>Elise, Lauren and Janneke
+                </p>        
             </div>`
         let params = generateParams(destination, content, "ahelpinghand.com About your fulfilled need")
         let command = new SendEmailCommand(params);
@@ -53,19 +59,16 @@ module.exports = {
         let content = `
             <div>
                 <p>
-                    Thank you for registering with A Helping Hand. Your Agency registration has been approved which means you are welcome to logon to <a href="https://ahelpinghand.com.au">https://ahelpinghand.com.au</a> and start listing needs of those you care for. 
-                    We hope that together with our generous local community that we can make a real and practical difference to those around us.    
+                Thank you for registering with A Helping Hand. Your Agency registration has been approved which means you are welcome to logon to <a href="https://ahelpinghand.com.au">https://ahelpinghand.com.au</a> and start listing the needs of those you care for. We hope that together with our generous local community that we can make a real and practical difference to those around us.
+                A big part of the success of A Helping Hand will be through letting our community know the difference they are making to help others. We need your help to do this!
                 </p><p>
-                    A big part of the success of A Helping Hand will be through letting our community know the difference they are making and ensuring we thank our generous supporters. 
+                We would love any photos of the items, stories and thank you notes that in no way identifies the recipients but highlights the generosity of our community. It is these story that will encourage others to give a helping hand where they can.
                 </p><p>
-                    We need your help to do this! We’d love any photos of the items, stories and thank you notes that no not identify the recipients but show the generosity of our community. It’s the beautiful stories of giving and the kindness that A Helping Hand shows and spreads that will encourage others to provide a helping hand where they can.
+                Please share your stories along with any photos you have by emailing us at community@ahelpinghand.com.au.
                 </p><p>
-                    Please share your stories along with any photos you have by emailing me at elise@ahelpinghand.com.au. 
+                Feel free to contact us any time with any questions you may have.
                 </p><p>
-                    Feel free to contact us any time with any questions you may have. My personal mobile is 0438 191817.
-                </p><p>
-                    Warm regards,<br/>
-                    Elise McKinnon
+                Warm regards, <br/>Elise, Lauren and Janneke
                 </p>
             </div>`
         let params = generateParams([destination], content, "ahelpinghand.com Organization approval notification")
@@ -123,26 +126,22 @@ module.exports = {
 
         let content = `
             <div>
-                <p> Hi, this is a reminder about your need: ${reminder.name} </p>
-                <p> The need is marked as having been contacted about fulfilment, but is still listed as unfulfilled. </p>
-                <p> 
-                    If the need is ongoing, please 'extend' it 
-                    <a href="${getBaseUrl()}/org/${reminder.organization_id}/needs/${reminder.need_id}/extend"> here </a> 
-                    to prevent it being removed manually.
-                </p>
-                <p> 
-                    If the need is fulfilled, please mark it as 'fulfilled' 
-                    <a href="${getBaseUrl()}/org/${reminder.organization_id}/needs/${reminder.need_id}/set-fulfilled"> here </a>
-                </p> 
-                </p>
-                    Else, you can delete the need 
-                    <a href="${getBaseUrl()}/org/${reminder.organization_id}/needs/${reminder.need_id}/delete"> here </a> 
+                <p>
+                    Dear ${reminder.contact_name}
+                <p></p>
+                    We are contacting you in regards to your needs listing for ${reminder.name}
+                <p></p>
+                    We are so pleased to see that someone has offered to fulfill your listed need. Could you please update your listing <a href="${getBaseUrl()}/org/${reminder.organization_id}/needs/${reminder.need_id}/set-fulfilled">here</a> if the need has been fulfilled?
+                <p></p>
+                    If the need is ongoing, please extend the listing <a href="${getBaseUrl()}/org/${reminder.organization_id}/needs/${reminder.need_id}/extend">here</a> to avoid it being deleted automatically.
+                <p></p>
+                    We appreciate the work you are doing to make a difference to so many in our community.
+                <p></p>
+                    Warm regards, <br/>Elise, Lauren and Janneke
                 </p>
             </div>
         `
-
         let params = generateParams([destination], content, `ahelpinghand.com Need reminder for: ${reminder.name}`)
-
         let command = new SendEmailCommand(params);
         return sesClient.send(command)
     },
@@ -153,6 +152,9 @@ module.exports = {
             <p> A new need was just posted and requires approval </p>
             <p> Name: ${need.name} </p>
             <p> Details: ${need.details} </p>
+            <p> Requirements: ${need.requirements ? need.requirements : " - "} </p>
+            <p> Region: ${need.region} </p>
+            <p> Category: ${need.category} </p>
             <p> 
                 <a href="${getBaseUrl()}/admin"> Go to Admin Panel  </a> 
             </p>
@@ -179,7 +181,6 @@ module.exports = {
         let command = new SendEmailCommand(params);
         return sesClient.send(command)     
     }
-
 }
 
 let getBaseUrl = () => {

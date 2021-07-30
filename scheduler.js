@@ -1,15 +1,8 @@
-// let tasks = [
-// 	() => {
-
-// 	},
-// ]
 let queries = require('./api/db/queries.js')
 let email = require('./api/endpoints/util/email')
 let db = require('./api/db')
 
-
 // TODO: Add task for cleaning up unused images in s3? 
-
 
 module.exports = {
 
@@ -23,7 +16,7 @@ module.exports = {
 			try {
 				client = await db.getClient()
 				result = await client.query(`
-				SELECT fulfilled_need_reminders.*, organizations.email, needs.name
+				SELECT fulfilled_need_reminders.*, organizations.email, organizations.contact_name, needs.name
 				FROM fulfilled_need_reminders 
 				JOIN organizations 
 				ON fulfilled_need_reminders.organization_id = organizations.id
@@ -49,11 +42,9 @@ module.exports = {
 				} catch(err) {
 					client.release()
 				}
-
 			})
 
 			client.release()
-
 
 		}, 1000 * 60 * 60)
 	}

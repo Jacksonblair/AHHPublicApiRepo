@@ -468,8 +468,6 @@ module.exports = {
 	},
 
 
-
-
 	/* Reminders */
 
 	// Add fulfilled need reminder
@@ -478,7 +476,7 @@ module.exports = {
 	addFulfilledNeedReminder: (needId, orgId) => {
 		return db.query(`INSERT INTO fulfilled_need_reminders 
 		(need_id, organization_id, target_date) 
-		VALUES ($1, $2, NOW() + INTERVAL '2 weeks') 
+		VALUES ($1, $2, NOW() + INTERVAL '1 minute') 
 		ON CONFLICT DO NOTHING`, [needId, orgId])
 	},
 
@@ -501,9 +499,7 @@ module.exports = {
 		client.release()
 	},
 
-
 	/* Misc */
-
 	getImpacts: async () => {
 		return db.query('SELECT * FROM impacts ORDER BY created_at DESC')
 	},
