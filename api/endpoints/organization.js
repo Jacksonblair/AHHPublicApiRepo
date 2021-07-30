@@ -152,7 +152,7 @@ router.get('/:orgid/needs/:needid', async (req, res) => {
 		} else {
 			// If result.rows[0].need_image_url is not truthy
 			// Overwrite it with a link to a default need sharing image url
-			res.send(getNeedMetaTags(`${process.env.WEBSITE_URL}/org/${req.params.orgid}/needs/${req.params.needid}`, result.rows[0]))
+			res.send(getNeedMetaTags(`${process.env.CLIENT_URL}/org/${req.params.orgid}/needs/${req.params.needid}`, result.rows[0]))
 		}
 	} catch(err) {
 		handleErr(err)

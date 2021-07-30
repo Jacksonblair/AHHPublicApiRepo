@@ -219,7 +219,7 @@ module.exports = {
 			details.state,
 			details.postcode,
 			details.country,
-			details.abn,
+			parseInt(details.abn),
 			details.email.toLowerCase(),
 			details.password ])
 	},
