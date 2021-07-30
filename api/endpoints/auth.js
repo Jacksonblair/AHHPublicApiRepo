@@ -27,14 +27,11 @@ router.get('/confirm-update-email/:uuid', Session.verifySession({sessionRequired
 
 	try {
 		await queries.confirmUpdateEmail(req.params.uuid)
-
 		if (req.session !== undefined) {
 			console.log("Killing session")
 			await req.session.revokeSession()
 		}
-
 		res.status(200).send({ message: MESSAGES.SUCCESS.UPDATED_ORG_EMAIL })	
-
 	} catch(err) {
 		handleErr(err)
 		res.status(400).send({ message: MESSAGES.ERROR.COULD_NOT_CONFIRM_EMAIL_CHANGE})

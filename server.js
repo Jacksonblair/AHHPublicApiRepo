@@ -55,6 +55,11 @@ app.options('*', (req, res) => {
     }
 })
 
+// Error handler
+app.use((err, req, res, next) => {
+    res.status(500).send({ message: err.message})
+})
+
 // Endpoints
 const authEndpoints = require('./api/endpoints/auth.js')
 const organizationEndpoints = require('./api/endpoints/organization.js')
