@@ -67,6 +67,10 @@ module.exports = {
 			re = new RegExp('^([0-9]){11}$')
 			if (!re.test(values.abn)) return false
 		}
+
+		console.log("VALUES")
+		console.log(values)
+
 		return true
 	},
 	

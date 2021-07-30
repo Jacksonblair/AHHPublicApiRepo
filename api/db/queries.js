@@ -162,7 +162,7 @@ module.exports = {
 			state = $8,
 			postcode = $9,
 			country = $10,
-			abn = $11
+			${details.abn == '' ? '' : details.abn}
 			WHERE id = $1`,
 			[ id,
 			details.contact_name,
@@ -174,7 +174,7 @@ module.exports = {
 			details.state,
 			details.postcode,
 			details.country,
-			details.abn])
+			details.abn == '' ? null : details.abn ])
 	},
 
 	updateOrganizationImage: (id, imageUrl) => {
@@ -219,7 +219,7 @@ module.exports = {
 			details.state,
 			details.postcode,
 			details.country,
-			parseInt(details.abn),
+			details.abn,
 			details.email.toLowerCase(),
 			details.password ])
 	},

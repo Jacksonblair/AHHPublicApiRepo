@@ -163,7 +163,6 @@ router.post('/org/:orgid/update-password', Session.verifySession(), mw.verifyOrg
 
 /* Registering a new organization */
 router.post('/org/add', async (req, res) => {
-
 	if (!validation.validateOrganization(req.body)) {
 		res.status(400).send({ message: MESSAGES.ERROR.INVALID_ORG_DETAILS })
 		return
