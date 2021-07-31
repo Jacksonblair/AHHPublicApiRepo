@@ -222,9 +222,11 @@ router.put('/:orgid/needs/:needid', Session.verifySession(), async (req, res) =>
 		return
 	}
 
-	// Delete old image from amazon
+	console.log(req.body)
+
 	try {
-		// Get old need first to check if we need to delete an existing image from S3
+		// If the image url has changed, delete the old one from amazon
+			// Get old need first to check if we need to delete an existing image from S3
 		console.log("Checking for old image url")
 		let result = await queries.getNeed(req.params.needid)
 		if (result.rows[0].need_image_url) {

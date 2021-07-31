@@ -245,40 +245,22 @@ module.exports = {
 	},
 
 	updateNeed: (id, need) => {
-		console.log(need)
-
-		if (need.need_image_url) {
-			return db.query(`UPDATE needs SET 
-				name = $2,
-				details = $3,
-				requirements = $4,
-				region = $5,
-				category = $6,
-				need_image_url = $7,
-				approved = false
-				WHERE id = $1`, 
-				[id, 
-				need.name, 
-				need.details,
-				need.requirements,
-				need.region,
-				need.category,
-				need.need_image_url])
-		} else {
-			return db.query(`UPDATE needs SET 
-				name = $2,
-				details = $3,
-				requirements = $4,
-				region = $5,
-				category = $6
-				WHERE id = $1`, 
-				[id, 
-				need.name, 
-				need.details,
-				need.requirements,
-				need.region,
-				need.category])
-		}
+		return db.query(`UPDATE needs SET 
+			name = $2,
+			details = $3,
+			requirements = $4,
+			region = $5,
+			category = $6,
+			need_image_url = $7,
+			approved = false
+			WHERE id = $1`, 
+			[id, 
+			need.name, 
+			need.details,
+			need.requirements,
+			need.region,
+			need.category,
+			need.need_image_url])
 	},
 
 	deleteNeed: (id) => {

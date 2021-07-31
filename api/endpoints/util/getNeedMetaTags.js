@@ -17,7 +17,7 @@ module.exports = (url, need) => {
 		</body>
 
 		<script>
-			window.location.replace('share.ahelpinghand.com.au')
+			window.location.replace('${url}')
 		</script>
 	</html>
 `}
