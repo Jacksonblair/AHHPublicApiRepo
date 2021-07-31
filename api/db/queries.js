@@ -254,7 +254,8 @@ module.exports = {
 				requirements = $4,
 				region = $5,
 				category = $6,
-				need_image_url = $7
+				need_image_url = $7,
+				approved = false
 				WHERE id = $1`, 
 				[id, 
 				need.name, 

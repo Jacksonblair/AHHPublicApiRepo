@@ -138,9 +138,25 @@ router.post('/:orgid/needs/add', Session.verifySession(), mw.verifyOrgOwner, mw.
 })
 
 /* Get need */
-router.get('/:orgid/needs/:needid', async (req, res) => {
+router.get('/:orgid/needs/:needid', Session.verifySession({sessionRequired: false}), async (req, res) => {
 	try {
 		let result = await queries.getNeed(req.params.needid)
+		console.log(req.params.orgid)
+
+		// If need is not approved, don't allow it to be shown to anyone except
+		// - The organization that posted it
+		// - Admins
+		if (result.rows.length && !result.rows[0].approved) {
+			if (req.session) {
+				let jwtPayload = req.session.getJWTPayload()
+				let userId = req.session.getUserId()
+				if (jwtPayload.role == "org" && userId !== result.rows[0].organization_id) {
+					return res.status(400).send({ message: "This need is not approved"})
+				}
+			} else {
+				return res.status(400).send({ message: "This need is not approved"})				
+			}
+		}
 
 		// Alternate response for any other website aside from our client
 		// Basically just to send correct Meta tags to facebook for sharing needs
@@ -216,6 +232,10 @@ router.put('/:orgid/needs/:needid', Session.verifySession(), async (req, res) =>
 		}
 
 		await queries.updateNeed(req.params.needid, req.body)
+
+		// Send email to admin notifying that the need has to be approved again
+		await email.sendUpdatedNeedNotification(req.body)
+
 		res.status(200).send({ message: MESSAGES.SUCCESS.UPDATED_NEED })
 	} catch(err) {
 		handleErr(err)

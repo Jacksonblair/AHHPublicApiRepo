@@ -166,6 +166,25 @@ module.exports = {
         return sesClient.send(command)
     },
 
+    sendUpdatedNeedNotification: (need) => {
+        let content = `
+        <div>
+            <p> An existing need was just updated and requires approval again </p>
+            <p> Name: ${need.name} </p>
+            <p> Details: ${need.details} </p>
+            <p> Requirements: ${need.requirements ? need.requirements : " - "} </p>
+            <p> Region: ${need.region} </p>
+            <p> Category: ${need.category} </p>
+            <p> 
+                <a href="${getBaseUrl()}/admin"> Go to Admin Panel </a> 
+            </p>
+        </div>
+        `
+        let params = generateParams(["elise@ahelpinghand.com.au", "janneke@ahelpinghand.com.au", "jtblair@deakin.edu.au"], content, `ahelpinghand.com Updated need notification`)
+        let command = new SendEmailCommand(params);
+        return sesClient.send(command)
+    },
+
     sendNewOrgNotification: (org) => {
         let content = `
         <div>
