@@ -294,6 +294,7 @@ module.exports = {
 			needs.category,
 			needs.need_image_url,
 			needs.fulfilled,
+			needs.approved,
 			to_char(needs.fulfilled_at, 'DD Mon YYYY') AS fulfilled_at,
 			needs.contacted,
 			organizations.organization_name, 
