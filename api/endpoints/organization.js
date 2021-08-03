@@ -142,6 +142,7 @@ router.get('/:orgid/needs/:needid', Session.verifySession({sessionRequired: fals
 	try {
 		let result = await queries.getNeed(req.params.needid)
 		console.log(req.params.orgid)
+		console.log(result)
 
 		// If need is not approved, don't allow it to be shown to anyone except
 		// - The organization that posted it
