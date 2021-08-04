@@ -158,7 +158,8 @@ router.get('/:orgid/needs/:needid', Session.verifySession({sessionRequired: fals
 		}
 
 		// Alternate response for any other website aside from our client
-		// Basically just to send correct Meta tags to facebook for sharing needs
+		// Basically just to send correct Meta tags to facebook for sharing needs,
+		// since the site is dynamically hosted and wont work with the facebook page scraper
 		console.log(req.headers.referer)
 
 		if (req.headers.referer == "https://ahelpinghandclient.herokuapp.com/" || req.headers.referer == 'http://localhost:3000/') {

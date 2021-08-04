@@ -52,11 +52,12 @@ module.exports = {
 		FROM organizations`)
 	},
 
+	// We create the 'expired' field here
 	adminGetAllNeeds: () => {
 		return db.query(`
 		SELECT needs.*,
-		(NOW() - target_date) AS time_expired
-		FROM needs LEFT OUTER JOIN fulfilled_need_reminders 
+		(NOW() - fulfilled_need_reminders.target_date) AS time_expired
+		FROM needs LEFT JOIN fulfilled_need_reminders 
 		ON needs.id = fulfilled_need_reminders.need_id 
 		ORDER BY needs.created_at DESC`)
 	},
@@ -460,7 +461,7 @@ module.exports = {
 	addFulfilledNeedReminder: (needId, orgId) => {
 		return db.query(`INSERT INTO fulfilled_need_reminders 
 		(need_id, organization_id, target_date) 
-		VALUES ($1, $2, NOW() + INTERVAL '1 minute') 
+		VALUES ($1, $2, NOW() + INTERVAL '2 weeks') 
 		ON CONFLICT DO NOTHING`, [needId, orgId])
 	},
 
@@ -479,7 +480,7 @@ module.exports = {
 			throw("Need is not valid for extension")
 		}
 
-		await db.query(`UPDATE fulfilled_need_reminders SET reminder_sent = False, target_date = NOW() + Interval '1 minute'`)
+		await db.query(`UPDATE fulfilled_need_reminders SET reminder_sent = False, target_date = NOW() + Interval '2 weeks'`)
 		client.release()
 	},
 
