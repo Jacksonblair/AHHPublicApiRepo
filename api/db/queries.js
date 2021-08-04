@@ -58,7 +58,7 @@ module.exports = {
 		SELECT needs.*,
 		(NOW() - fulfilled_need_reminders.target_date) AS time_expired
 		FROM needs LEFT JOIN fulfilled_need_reminders 
-		ON needs.id = fulfilled_need_reminders.need_id 
+		ON needs.id = fulfilled_need_reminders.need_id AND fulfilled_need_reminders.target_date < NOW()
 		ORDER BY needs.created_at DESC`)
 	},
 
