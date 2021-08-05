@@ -69,7 +69,13 @@ module.exports = {
 	},
 
 	adminGetImpacts: () => {
-		return db.query(`SELECT * from impacts ORDER BY created_at`)
+		return db.query(`
+			SELECT id,
+			title,
+			content,
+			impact_image_urls,
+			to_char(created_at::timestamp, 'DD mon YYYY') as created_at
+			from impacts ORDER BY created_at`)
 	},
  
 	adminGetImpactById: (impactId) => {
@@ -163,7 +169,7 @@ module.exports = {
 			state = $8,
 			postcode = $9,
 			country = $10,
-			${details.abn == '' ? '' : details.abn}
+			abn = $11
 			WHERE id = $1`,
 			[ id,
 			details.contact_name,
@@ -175,7 +181,7 @@ module.exports = {
 			details.state,
 			details.postcode,
 			details.country,
-			details.abn == '' ? null : details.abn ])
+			details.abn])
 	},
 
 	updateOrganizationImage: (id, imageUrl) => {

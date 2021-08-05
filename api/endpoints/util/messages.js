@@ -9,12 +9,12 @@ const MESSAGES = {
 
 
 		/* Org */
-		UPDATED_ORG_PROFILE: "Successfully updated organization account details",
-		UPDATED_ORG_ABOUT: "Successfully updated organization 'About'",
+		UPDATED_ORG_PROFILE: "Successfully updated organisation account details",
+		UPDATED_ORG_ABOUT: "Successfully updated organisation 'About'",
 		UPDATED_ORG_PASSWORD: "Successfully updated password",
 		UPDATED_ORG_EMAIL: "Successfully updated e-mail",
-		GOT_ORG_PROFILE: "Got organization profile",
-		DELETED_ORG: "Successfully deleted organization",
+		GOT_ORG_PROFILE: "Got organisation profile",
+		DELETED_ORG: "Successfully deleted organisation",
 
 		/*Needs */
 		ADDED_NEED: "Successfully added need",
@@ -31,8 +31,8 @@ const MESSAGES = {
 
 		/* Admin */
 		TOGGLED_NEED_MAJOR: "Successfully toggled need 'major' flag",
-		GOT_ALL_ORGS: "Successfully got all organizations",
-		TOGGLED_ORG_APPROVAL: "Successfully toggled organization 'approval' flag",
+		GOT_ALL_ORGS: "Successfully got all organisations",
+		TOGGLED_ORG_APPROVAL: "Successfully toggled organisation 'approval' flag",
 		DELETED_IMPACT: "Successfully deleted impact",
 		ADDED_IMPACT: "Successfully added impact",
 		UPDATED_IMPACT: "Successfully updated impact",
@@ -48,16 +48,16 @@ const MESSAGES = {
 		NOT_ADMIN: "Admin only route",
 
 		/* Org */
-		NOT_ORG_OWNER: "You do not own this organization",
+		NOT_ORG_OWNER: "You do not own this organisation",
 		INVALID_ORG_DETAILS: "Organization details are invalid",
 		ORG_NOT_APPROVED: "Organization is not approved",
 
-		CANT_UPDATE_ORG_PROFILE: "Could not update organization account details",
-		CANT_UPDATE_ORG_ABOUT: "Could not update organization 'About'",
-		COULD_NOT_ADD_ORG: "Could not add organization",
-		CANT_GET_ORG_PROFILE: "Could not get organization profile",
+		CANT_UPDATE_ORG_PROFILE: "Could not update organisation account details",
+		CANT_UPDATE_ORG_ABOUT: "Could not update organisation 'About'",
+		COULD_NOT_ADD_ORG: "Could not add organisation",
+		CANT_GET_ORG_PROFILE: "Could not get organisation profile",
 		ORG_DOES_NOT_EXIST: "Organization details could not be found",
-		CANT_DELETE_ORG: "Could not delete organization",
+		CANT_DELETE_ORG: "Could not delete organisation",
 
 		/* Needs */
 		CANT_ADD_NEED: "Could not add need",
@@ -76,7 +76,7 @@ const MESSAGES = {
 
 		/* Auth */
 		COULD_NOT_UPDATE_ORG_PASSWORD: "Could not update password",
-		COULD_NOT_RESET_ORG_PASSWORD: "Could not reset organization password",
+		COULD_NOT_RESET_ORG_PASSWORD: "Could not reset organisation password",
 		CANT_LOG_IN: "Could not log in",
 		INCORRECT_CREDENTIALS: "Password and email combination not found",
 		INVALID_NEW_PASSWORD: "New password is not valid",
@@ -93,8 +93,8 @@ const MESSAGES = {
 		COULD_NOT_GET_FACEBOOK_FEED: "Could not get facebook feed",
 
 		/* Admin */
-		COULD_NOT_GET_ALL_ORGS: "Could not get all organizations",
-		CANT_TOGGLE_ORG_APPROVAL: "Could not toggle organization 'approval' flag",
+		COULD_NOT_GET_ALL_ORGS: "Could not get all organisations",
+		CANT_TOGGLE_ORG_APPROVAL: "Could not toggle organisation 'approval' flag",
 		CANT_DELETE_IMPACT: "Could not delete impact",
 		CANT_ADD_IMPACT: "Could not add impact",
 		CANT_UPDATE_IMPACT: "Could not update impact",
