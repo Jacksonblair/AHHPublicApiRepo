@@ -3,6 +3,11 @@ const router = new Router()
 const queries = require('../db/queries.js')
 const MESSAGES = require('./util/messages.js')
 const handleErr = require('./util/errors.js')
+const path = require('path')
+
+router.get('/temp', async (req, res) => {
+	res.sendFile(path.resolve(__dirname + "../../views/temp.html"))
+})
 
 router.get('/impacts', async (req, res) => {
 	try {

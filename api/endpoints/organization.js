@@ -15,7 +15,7 @@ const { deleteImage } = require('./aws')
 router.get('/:orgid/profile', async (req, res) => {
 	try {
 		let result = await queries.getOrganizationProfileById(req.params.orgid)
-		if (!result.rows.length) throw("Org doesnt exist")
+		if (!result.rows.length) throw("Org doesn't exist")
 		res.status(200).send({ message: MESSAGES.SUCCESS.GOT_ORG_PROFILE, profile: result.rows[0]})
 	} catch(err) {
 		handleErr(err)
@@ -26,8 +26,8 @@ router.get('/:orgid/profile', async (req, res) => {
 /* Update org profile details */
 router.put('/:orgid/profile', Session.verifySession(), mw.verifyOrgOwner, async (req, res) => {
 
-	// TODO: Valiate profile details
-	if (!validation.validateUpdateOrganization(req.body)) {
+	// TODO: Validate profile details
+	if (!validation.validateUpdateOrganization(req.body)) {7
 		res.status(400).send({ message: MESSAGES.ERROR.CANT_UPDATE_ORG_PROFILE})
 		return
 	}
