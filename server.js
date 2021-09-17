@@ -60,9 +60,6 @@ app.use((err, req, res, next) => {
     res.status(500).send({ message: err.message})
 })
 
-// For serving static files (temp page)
-app.use(express.static('static'))
-
 // Endpoints
 const authEndpoints = require('./api/endpoints/auth.js')
 const organizationEndpoints = require('./api/endpoints/organization.js')

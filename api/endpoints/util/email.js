@@ -4,6 +4,7 @@ const { v4: uuidv4 } = require('uuid')
 // Create SES service object.
 const sesClient = new SESClient({ region: process.env.AWS_REGION });
 
+
 let generateParams = (destinations, content, subject) => {
     console.log("Generating params for email")
     console.log("Destination: " + Array.isArray(destinations) ? destinations.toString() : destinations )
@@ -22,7 +23,7 @@ let generateParams = (destinations, content, subject) => {
                     Charset: "UTF-8",
                     Data: content,
                 }
-            },
+            },  
             Subject: {
                 Charset: "UTF-8",
                 Data: subject,

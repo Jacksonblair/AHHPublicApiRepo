@@ -163,11 +163,8 @@ router.get('/:orgid/needs/:needid', Session.verifySession({sessionRequired: fals
 		console.log(req.headers.referer)
 
 		if (req.headers.referer == "https://ahelpinghandclient.herokuapp.com/" || req.headers.referer == 'http://localhost:3000/') {
-			console.log("Got right org")
 			res.status(200).send({ message: MESSAGES.SUCCESS.GOT_NEED, need: result.rows[0] })
 		} else {
-			// If result.rows[0].need_image_url is not truthy
-			// Overwrite it with a link to a default need sharing image url
 			res.send(getNeedMetaTags(`${process.env.CLIENT_URL}/org/${req.params.orgid}/needs/${req.params.needid}`, result.rows[0]))
 		}
 	} catch(err) {
