@@ -12,10 +12,18 @@ const getNeedMetaTags = require('./util/getNeedMetaTags.js')
 const { deleteImage } = require('./aws')
 
 /* Get org profile details */
-router.get('/:orgid/profile', async (req, res) => {
+router.get('/:orgid/profile', Session.verifySession({ sessionRequired: false }), async (req, res) => {
+	console.log("GETTING PROFILE")
+
 	try {
 		let result = await queries.getOrganizationProfileById(req.params.orgid)
 		if (!result.rows.length) throw("Org doesn't exist")
+		if (result.rows[0].anonymous == true) {
+			let id = req.session.getUserId()
+			if (req.params.orgid !== id) {
+				throw("This organisations details are not public")
+			}
+		} 
 		res.status(200).send({ message: MESSAGES.SUCCESS.GOT_ORG_PROFILE, profile: result.rows[0]})
 	} catch(err) {
 		handleErr(err)
@@ -155,6 +163,13 @@ router.get('/:orgid/needs/:needid', Session.verifySession({sessionRequired: fals
 			} else {
 				return res.status(400).send({ message: "This need is not approved"})				
 			}
+		}
+
+		// Scour organisation details from the result if the org is anonymous
+		if (result.rows[0].anonymous) {
+			result.rows[0].organization_name = "local agency"
+			result.rows[0].profile_image_url = null
+			result.rows[0].contact_name = "local agency"
 		}
 
 		// Alternate response for any other website aside from our client

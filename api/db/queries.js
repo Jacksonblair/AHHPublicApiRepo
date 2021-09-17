@@ -48,7 +48,8 @@ module.exports = {
 		city,
 		state,
 		postcode,
-		country 
+		country,
+		anonymous
 		FROM organizations`)
 	},
 
@@ -131,6 +132,7 @@ module.exports = {
 		state,
 		postcode,
 		country,
+		anonymous,
 		abn
 		FROM organizations WHERE id = $1`, [id])
 	},
@@ -169,7 +171,8 @@ module.exports = {
 			state = $8,
 			postcode = $9,
 			country = $10,
-			abn = $11
+			abn = $11,
+			anonymous = $12
 			WHERE id = $1`,
 			[ id,
 			details.contact_name,
@@ -181,7 +184,8 @@ module.exports = {
 			details.state,
 			details.postcode,
 			details.country,
-			details.abn])
+			details.abn,
+			details.anonymous])
 	},
 
 	updateOrganizationImage: (id, imageUrl) => {
@@ -214,8 +218,9 @@ module.exports = {
 			country,
 			abn,
 			email,
+			anonymous,
 			password_hash)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`, 
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`, 
 			[ details.contact_name,
 			details.contact_number,
 			details.organization_name,
@@ -228,6 +233,7 @@ module.exports = {
 			details.country,
 			details.abn,
 			details.email.toLowerCase(),
+			details.anonymous,
 			details.password ])
 	},
 
@@ -306,7 +312,8 @@ module.exports = {
 			needs.contacted,
 			organizations.organization_name, 
 			organizations.profile_image_url,
-			organizations.contact_name
+			organizations.contact_name,
+			organizations.anonymous
 			FROM needs 
 			JOIN organizations ON needs.organization_id = organizations.id
 			WHERE needs.id = $1`, [id])
@@ -546,7 +553,8 @@ module.exports = {
 		email VARCHAR(200) NOT NULL,
 		password_hash VARCHAR(200) NOT NULL,
 		created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-		profile_image_url VARCHAR(200)
+		profile_image_url VARCHAR(200),
+		anonymous BOOL NOT NULL DEFAULT False
 	);
 
 	CREATE TABLE admins (

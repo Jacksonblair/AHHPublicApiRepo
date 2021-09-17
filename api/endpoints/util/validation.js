@@ -31,6 +31,7 @@ module.exports = {
 		let re = new RegExp('^(0[289][0-9]{2})$|^([1-9][0-9]{3})$')
 		if (!re.test(values.postcode)) return false
 		if (!values.country) return false
+		if (!["true", "false"].includes(values.anonymous))
 		if (values.tos != 'true') return false
 		// if (!values.abn) return false
 		// Basic regex for validating ABN. Just checks digit length. Does not check real validity
@@ -61,6 +62,7 @@ module.exports = {
 		let re = new RegExp('^(0[289][0-9]{2})$|^([1-9][0-9]{3})$')
 		if (!re.test(values.postcode))return false
 		if (!values.country) return false
+		if (!["true", "false"].includes(values.anonymous))
 		// Basic regex for validating ABN. Just checks digit length. Does not check real validity
 		// https://abr.business.gov.au/Help/AbnFormat
 		if (values.abn) {

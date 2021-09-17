@@ -240,6 +240,7 @@ router.post('/login', async(req, res) => {
 	    res.status(200).send({ message: MESSAGES.SUCCESS.LOGGED_IN })
 
 	} catch(err) {
+		console.log(err.message)
 		handleErr(err)
 		res.status(400).send({ message: MESSAGES.ERROR.CANT_LOG_IN })
 	}
