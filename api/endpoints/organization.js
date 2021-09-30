@@ -13,8 +13,6 @@ const { deleteImage } = require('./aws')
 
 /* Get org profile details */
 router.get('/:orgid/profile', Session.verifySession({ sessionRequired: false }), async (req, res) => {
-	console.log("GETTING PROFILE")
-
 	try {
 		let result = await queries.getOrganizationProfileById(req.params.orgid)
 		if (!result.rows.length) throw("Org doesn't exist")
