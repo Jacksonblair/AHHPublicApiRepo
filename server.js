@@ -38,7 +38,7 @@ app.use(bodyParser.json())
 
 // Supertokens middlewares (have to go BEFORE endpoints)
 app.use(cors({
-    origin: `${websiteUrl},http://localhost:45678`,
+    origin: [websiteUrl, 'http://localhost:45678'],
     allowedHeaders: ["content-type", ...supertokens.getAllCORSHeaders()],
     credentials: true,
 }));
