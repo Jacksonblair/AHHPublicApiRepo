@@ -17,9 +17,11 @@ router.get('/:orgid/profile', Session.verifySession({ sessionRequired: false }),
 		let result = await queries.getOrganizationProfileById(req.params.orgid)
 		if (!result.rows.length) throw("Org doesn't exist")
 		if (result.rows[0].anonymous == true) {
-			let id = req.session.getUserId()
-			if (req.params.orgid !== id) {
-				throw("This organisations details are not public")
+			if (req.session) {
+				let id = req.session.getUserId()
+				if (req.params.orgid !== id) {
+					throw("This organisations details are not public")
+				}		
 			}
 		} 
 		res.status(200).send({ message: MESSAGES.SUCCESS.GOT_ORG_PROFILE, profile: result.rows[0]})
@@ -153,6 +155,7 @@ router.get('/:orgid/needs/:needid', Session.verifySession({sessionRequired: fals
 		// - Admins
 		if (result.rows.length && !result.rows[0].approved) {
 			if (req.session) {
+				console.log(req.session)
 				let jwtPayload = req.session.getJWTPayload()
 				let userId = req.session.getUserId()
 				if (jwtPayload.role == "org" && userId !== result.rows[0].organization_id) {
@@ -181,6 +184,7 @@ router.get('/:orgid/needs/:needid', Session.verifySession({sessionRequired: fals
 			res.send(getNeedMetaTags(`${process.env.CLIENT_URL}/org/${req.params.orgid}/needs/${req.params.needid}`, result.rows[0]))
 		}
 	} catch(err) {
+		console.log("/:orgid/needs/:needid")
 		handleErr(err)
 		res.status(400).send({ message: MESSAGES.ERROR.CANT_GET_NEED })
 	}
