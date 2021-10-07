@@ -38,23 +38,11 @@ app.use(bodyParser.json())
 
 // Supertokens middlewares (have to go BEFORE endpoints)
 app.use(cors({
-    origin: websiteUrl,
+    origin: `${websiteUrl},http://localhost:45678`,
     allowedHeaders: ["content-type", ...supertokens.getAllCORSHeaders()],
     credentials: true,
 }));
-
 app.use(supertokens.middleware());
-
-// Set CORS headers
-app.options('*', (req, res) => {
-    if (process.env.NODE_ENV == 'production') {
-        // res.header("Access-Control-Allow-Methods", "POST");
-        supertokens.setRelevantHeadersForOptionsAPI(res);
-        res.header("Access-Control-Allow-Origin", `${websiteUrl},http://localhost:45678"`);
-        res.send("success");
-        console.log(res.header)
-    }
-})
 
 // Error handler
 app.use((err, req, res, next) => {
