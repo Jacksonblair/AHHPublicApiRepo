@@ -48,7 +48,7 @@ app.use(supertokens.middleware());
 // Set CORS headers
 app.options('*', (req, res) => {
     if (process.env.NODE_ENV == 'production') {
-        res.header("Access-Control-Allow-Origin", [websiteUrl, "http://localhost:45678"].join(', '));
+        res.header("Access-Control-Allow-Origin", `${websiteUrl}, http://localhost:45678"`);
         // res.header("Access-Control-Allow-Methods", "POST");
         supertokens.setRelevantHeadersForOptionsAPI(res);
         res.send("success");      
