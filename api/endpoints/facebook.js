@@ -21,7 +21,7 @@ const getJSON = bent('json')
 let pageIds = {
 	"corangamite": process.env.FB_CORANGAMITE_PAGE_ID,
 	"warrnambool": process.env.FB_WARRNAMBOOL_PAGE_ID,
-	"geelong": process.env.FB_GEELONG_PAGE_ID
+	"colac": process.env.FB_COLAC_PAGE_ID
 }
 
 router.get('/:region', async (req, res) => {

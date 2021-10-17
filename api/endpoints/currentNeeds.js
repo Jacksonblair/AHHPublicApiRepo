@@ -7,7 +7,7 @@ const handleErr = require('./util/errors.js')
 router.get('/:region', async (req, res) => {
 	
 	// Validate region
-	if (!["geelong", "corangamite", "warrnambool", "all"].includes(req.params.region)) {
+	if (!["colac", "corangamite", "warrnambool", "all"].includes(req.params.region)) {
 		res.status(400).send({ message: MESSAGES.ERROR.INVALID_REGION })
 		return
 	}
