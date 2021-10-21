@@ -155,7 +155,6 @@ router.get('/:orgid/needs/:needid', Session.verifySession({sessionRequired: fals
 		// - Admins
 		if (result.rows.length && !result.rows[0].approved) {
 			if (req.session) {
-				console.log(req.session)
 				let jwtPayload = req.session.getJWTPayload()
 				let userId = req.session.getUserId()
 				if (jwtPayload.role == "org" && userId !== result.rows[0].organization_id) {
@@ -177,14 +176,12 @@ router.get('/:orgid/needs/:needid', Session.verifySession({sessionRequired: fals
 		// Basically just to send correct Meta tags to facebook for sharing needs,
 		// since the site is dynamically hosted and wont work with the facebook page scraper
 		console.log(req.headers.referer)
-
-		if (req.headers.referer == "https://ahelpinghandclient.herokuapp.com/" || req.headers.referer == 'http://localhost:3000/') {
+		if (req.headers.referer == "https://www.ahelpinghand.com.au/" || req.headers.referer == 'http://localhost:3000/') {
 			res.status(200).send({ message: MESSAGES.SUCCESS.GOT_NEED, need: result.rows[0] })
 		} else {
 			res.send(getNeedMetaTags(`${process.env.CLIENT_URL}/org/${req.params.orgid}/needs/${req.params.needid}`, result.rows[0]))
 		}
 	} catch(err) {
-		console.log("/:orgid/needs/:needid")
 		handleErr(err)
 		res.status(400).send({ message: MESSAGES.ERROR.CANT_GET_NEED })
 	}
